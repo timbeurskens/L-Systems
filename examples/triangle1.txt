@@ -1,0 +1,16 @@
+[rules]
+B=[BhhhB]+w-[BBhBB]+w-[BBBBB]+w-[BBhBB]+w-[BhhhB]-wwww+hhhhh
+w=wwwww
+h=hhhhh
+[turtle]
+B={g+g+g+g+}f
+w=f
+h=f
+[settings]
+axiom=B
+angle=90
+image_output=false
+image_preview=true
+polygon_color=#000000
+generations=5
+length=5

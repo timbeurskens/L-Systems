@@ -1,0 +1,2 @@
+java -jar CarpetDesigner.jar -s 3x3 -o CarpetDesignerOutputFile.txt turtle_output=false color=#FF0000 image_output=false image_animation=false length=15 image_preview=true generations=5 polygon_color=#000000 -f -e
+java -Xmx4G -jar L-System.jar CarpetDesignerOutputFile.txt

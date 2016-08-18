@@ -1,0 +1,14 @@
+[rules]
+L=UTL
+T=DUT
+[turtle]
+U=G+f-
+D=f+++Gf---
+T=]f[
+[settings]
+axiom=[[L]]
+angle=60
+image_output=false
+image_preview=false
+generations=3
+turtle_output=true

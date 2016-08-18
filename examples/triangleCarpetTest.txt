@@ -1,0 +1,13 @@
+[rules]
+G=GfG+f++Gf+++G--f++
+f=ff
+[turtle]
+G={g++g++g++}
+[settings]
+axiom=G
+angle=60
+image_output=false
+image_preview=true
+polygon_color=#000000
+generations=5
+length=15
