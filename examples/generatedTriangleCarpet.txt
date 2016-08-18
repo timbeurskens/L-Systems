@@ -1,0 +1,13 @@
+[rules]
+G=[[+f-f+++Gf---G+f-f+++Gf---G+f-]f[G+f-f+++f---G+f-]f[G+f-]f[]]
+f=fff
+[turtle]
+G={g++g++g++}
+[settings]
+axiom=G
+angle=60
+image_output=false
+image_preview=true
+polygon_color=#000000
+generations=5
+length=15

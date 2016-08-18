@@ -1,0 +1,12 @@
+[rules]
+L=+R-F-R+
+R=-L+F+L-
+[turtle]
+F=g
+[settings]
+axiom=L--F--L--F
+image_output=false
+image_animation=true
+image_preview=true
+angle=45
+generations=11
