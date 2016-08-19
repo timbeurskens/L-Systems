@@ -2,6 +2,7 @@ package main;
 
 import graphics.ImagePreviewer;
 import graphics.TurtleAnimator;
+import lsystem.ContextSensitiveString;
 import lsystem.LSystem;
 import lsystem.RuleSet;
 import lsystem.StochasticString;
@@ -24,6 +25,7 @@ public class ApplicationLoader {
     static Pattern  sectionPattern  = Pattern.compile( "\\s*\\[([^]]*)\\]\\s*" );
     static Pattern keyValuePattern = Pattern.compile( "\\s*([^=]*)=(.*)" );
     static Pattern stochasticPattern = Pattern.compile("(\\S)[0-9]?\\[([^]]*)\\]");
+    static Pattern contextSensitivePattern = Pattern.compile("((\\S*)<)?(\\S)?(>(\\S*))?");
 
     private static HashMap<String, HashMap<String, String>> readConfiguration(String filename) throws IOException{
         HashMap<String, HashMap<String, String>> configuration = new HashMap<>();
@@ -147,6 +149,7 @@ public class ApplicationLoader {
             if(systemRuleCollection != null){
                 systemRuleCollection.forEach((s, s2) -> {
                     Matcher stochasticMatcher = stochasticPattern.matcher(s);
+                    Matcher sensitiveMatcher = contextSensitivePattern.matcher(s);
                     if(!stochasticMatcher.matches() && s.length() == 1){
                         char key = s.charAt(0);
                         systemRules.put(key, s2);
@@ -165,6 +168,14 @@ public class ApplicationLoader {
                             StochasticString ss = new StochasticString();
                             ss.addProduction(s2, Double.parseDouble(stochasticMatcher.group(2).trim()));
                             systemRules.put(symbol, ss);
+                        }
+                    } else if (sensitiveMatcher.matches()) {
+                        char symbol = sensitiveMatcher.group(3).trim().charAt(0);
+                        if (systemRules.containsKey(symbol)) {
+
+                        } else {
+                            ContextSensitiveString cxs = new ContextSensitiveString();
+                            cxs.addProduction(s2, sensitiveMatcher.group(2).trim(), sensitiveMatcher.group(5).trim());
                         }
                     }
                 });

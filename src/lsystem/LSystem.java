@@ -30,6 +30,11 @@ public class LSystem {
                     newTape.append(production);
                 }else if(production instanceof StochasticString){
                     newTape.append(((StochasticString) production).getRandomProduction());
+                } else if (production instanceof ContextSensitiveString) {
+                    newTape.append(((ContextSensitiveString) production).getProduction((before, after) -> {
+                        System.out.println("hi");
+                        return false;
+                    }));
                 }
             }else{
                 newTape.append(chars[i]);
