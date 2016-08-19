@@ -15,6 +15,10 @@ public class ContextProductionCollection {
         this.after = a;
     }
 
+    public ContextProductionCollection(String p) {
+        this.production = p;
+    }
+
     public int getScore() {
         return (isEmptyBefore() ? 0 : 1) + (isEmptyAfter() ? 0 : 1);
     }

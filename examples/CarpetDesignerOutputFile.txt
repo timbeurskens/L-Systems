@@ -1,5 +1,5 @@
 [rules]
-B=[BBB]+w-[BhB]+w-[BBB][+w]-ww+hhh
+B=[Bhh]+w-[hBh]+w-[Bhh][+w]-ww+hhh
 w=www
 h=hhh
 [turtle]

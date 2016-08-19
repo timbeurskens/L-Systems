@@ -25,7 +25,7 @@ public class ApplicationLoader {
     static Pattern  sectionPattern  = Pattern.compile( "\\s*\\[([^]]*)\\]\\s*" );
     static Pattern keyValuePattern = Pattern.compile( "\\s*([^=]*)=(.*)" );
     static Pattern stochasticPattern = Pattern.compile("(\\S)[0-9]?\\[([^]]*)\\]");
-    static Pattern contextSensitivePattern = Pattern.compile("((\\S*)<)?(\\S)(>(\\S*))?");
+    static Pattern contextSensitivePattern = Pattern.compile("((\\S)<)?(\\S)(>(\\S))?");
 
     private static HashMap<String, HashMap<String, String>> readConfiguration(String filename) throws IOException{
         HashMap<String, HashMap<String, String>> configuration = new HashMap<>();
@@ -150,9 +150,17 @@ public class ApplicationLoader {
                 systemRuleCollection.forEach((s, s2) -> {
                     Matcher stochasticMatcher = stochasticPattern.matcher(s);
                     Matcher sensitiveMatcher = contextSensitivePattern.matcher(s);
-                    if(!stochasticMatcher.matches() && s.length() == 1){
+                    if (s.length() == 1) {
                         char key = s.charAt(0);
-                        systemRules.put(key, s2);
+                        if (systemRules.containsKey(key)) {
+                            if (systemRules.get(key) instanceof StochasticString) {
+                                ((StochasticString) systemRules.get(key)).addProduction(s2, 1);
+                            } else if (systemRules.get(key) instanceof ContextSensitiveString) {
+                                ((ContextSensitiveString) systemRules.get(key)).addProduction(s2);
+                            }
+                        } else {
+                            systemRules.put(key, s2);
+                        }
                     }else if(stochasticMatcher.matches()){
                         char symbol = stochasticMatcher.group(1).trim().charAt(0);
                         if(systemRules.containsKey(symbol)){
@@ -171,11 +179,17 @@ public class ApplicationLoader {
                         }
                     } else if (sensitiveMatcher.matches()) {
                         char symbol = sensitiveMatcher.group(3).trim().charAt(0);
-                        if (systemRules.containsKey(symbol)) {
-
+                        if (systemRules.containsKey(symbol) && systemRules.get(symbol) instanceof ContextSensitiveString) {
+                            ((ContextSensitiveString) systemRules.get(symbol)).addProduction(s2, sensitiveMatcher.group(2).trim().charAt(0), sensitiveMatcher.group(5).trim().charAt(0));
                         } else {
                             ContextSensitiveString cxs = new ContextSensitiveString();
-                            cxs.addProduction(s2, sensitiveMatcher.group(2).trim(), sensitiveMatcher.group(5).trim());
+                            String before = sensitiveMatcher.group(2);
+                            String after = sensitiveMatcher.group(5);
+
+                            char beforeChar = before != null ? before.trim().charAt(0) : '\0';
+                            char afterChar = after != null ? after.trim().charAt(0) : '\0';
+                            cxs.addProduction(s2, beforeChar, afterChar);
+                            systemRules.put(symbol, cxs);
                         }
                     }
                 });

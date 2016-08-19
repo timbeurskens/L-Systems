@@ -24,6 +24,7 @@ public class LSystem {
         final char[] chars = (char[]) tapeField.get(oldTape);
         final int len = chars.length;
         for(int i = 0; i < len; i++){
+            final int currentIndex = i;
             Object production = productionRules.get(chars[i]);
             if(production != null){
                 if(production instanceof String) {
@@ -31,10 +32,32 @@ public class LSystem {
                 }else if(production instanceof StochasticString){
                     newTape.append(((StochasticString) production).getRandomProduction());
                 } else if (production instanceof ContextSensitiveString) {
-                    newTape.append(((ContextSensitiveString) production).getProduction((before, after) -> {
-                        System.out.println("hi");
-                        return false;
-                    }));
+                    String result = ((ContextSensitiveString) production).getProduction((collection) -> {
+                        if (!collection.isEmptyBefore()) {
+                            if (currentIndex <= 0) {
+                                if (collection.getBefore() != '<') {  //match begin string
+                                    return false;
+                                }
+                            } else if (currentIndex > 0) {
+                                if (collection.getBefore() != chars[currentIndex - 1]) {
+                                    return false;
+                                }
+                            }
+                        }
+                        if (!collection.isEmptyAfter()) {
+                            if (currentIndex >= chars.length - 1) {
+                                if (collection.getAfter() != '>') {  //match end string
+                                    return false;
+                                }
+                            } else if (currentIndex < chars.length - 1) {
+                                if (collection.getAfter() != chars[currentIndex + 1]) {
+                                    return false;
+                                }
+                            }
+                        }
+                        return true;
+                    });
+                    newTape.append(result != null ? result : chars[i]);
                 }
             }else{
                 newTape.append(chars[i]);
