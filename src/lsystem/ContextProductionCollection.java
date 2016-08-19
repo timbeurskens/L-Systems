@@ -6,36 +6,32 @@ package lsystem;
  */
 public class ContextProductionCollection {
     private String production;
-    private String before;
-    private String after;
+    private char before = '\0';
+    private char after = '\0';
 
-    public ContextProductionCollection(String p, String b, String a) {
+    public ContextProductionCollection(String p, char b, char a) {
         this.production = p;
         this.before = b;
         this.after = a;
     }
 
-    public int getBeforeLength() {
-        return before.length();
-    }
-
-    public int getAfterLength() {
-        return after.length();
+    public int getScore() {
+        return (isEmptyBefore() ? 0 : 1) + (isEmptyAfter() ? 0 : 1);
     }
 
     public boolean isEmptyBefore() {
-        return before == null || getBeforeLength() == 0;
+        return before == '\0';
     }
 
     public boolean isEmptyAfter() {
-        return after == null || getAfterLength() == 0;
+        return after == '\0';
     }
 
-    public String getBefore() {
+    public char getBefore() {
         return before;
     }
 
-    public String getAfter() {
+    public char getAfter() {
         return after;
     }
 

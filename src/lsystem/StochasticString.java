@@ -34,7 +34,7 @@ public class StochasticString {
     public String toString(){
         StringBuilder strb = new StringBuilder();
         elements.forEach(stringPermutationCollection -> {
-            strb.append(stringPermutationCollection.getProduction() + ":" + stringPermutationCollection.getChance() / 1000.0 + ", ");
+            strb.append(stringPermutationCollection.getProduction()).append(":").append(stringPermutationCollection.getChance() / 1000.0).append(", ");
         });
         return strb.toString();
     }

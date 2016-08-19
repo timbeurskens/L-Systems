@@ -25,7 +25,7 @@ public class ApplicationLoader {
     static Pattern  sectionPattern  = Pattern.compile( "\\s*\\[([^]]*)\\]\\s*" );
     static Pattern keyValuePattern = Pattern.compile( "\\s*([^=]*)=(.*)" );
     static Pattern stochasticPattern = Pattern.compile("(\\S)[0-9]?\\[([^]]*)\\]");
-    static Pattern contextSensitivePattern = Pattern.compile("((\\S*)<)?(\\S)?(>(\\S*))?");
+    static Pattern contextSensitivePattern = Pattern.compile("((\\S*)<)?(\\S)(>(\\S*))?");
 
     private static HashMap<String, HashMap<String, String>> readConfiguration(String filename) throws IOException{
         HashMap<String, HashMap<String, String>> configuration = new HashMap<>();
