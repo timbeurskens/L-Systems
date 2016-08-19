@@ -180,7 +180,22 @@ public class ApplicationLoader {
                     } else if (sensitiveMatcher.matches()) {
                         char symbol = sensitiveMatcher.group(3).trim().charAt(0);
                         if (systemRules.containsKey(symbol) && systemRules.get(symbol) instanceof ContextSensitiveString) {
-                            ((ContextSensitiveString) systemRules.get(symbol)).addProduction(s2, sensitiveMatcher.group(2).trim().charAt(0), sensitiveMatcher.group(5).trim().charAt(0));
+                            String before = sensitiveMatcher.group(2);
+                            String after = sensitiveMatcher.group(5);
+
+                            char beforeChar = before != null ? before.trim().charAt(0) : '\0';
+                            char afterChar = after != null ? after.trim().charAt(0) : '\0';
+                            ((ContextSensitiveString) systemRules.get(symbol)).addProduction(s2, beforeChar, afterChar);
+                        } else if (systemRules.containsKey(symbol) && systemRules.get(symbol) instanceof String) {
+                            ContextSensitiveString cxs = new ContextSensitiveString();
+                            cxs.addProduction((String) systemRules.get(symbol));
+                            String before = sensitiveMatcher.group(2);
+                            String after = sensitiveMatcher.group(5);
+
+                            char beforeChar = before != null ? before.trim().charAt(0) : '\0';
+                            char afterChar = after != null ? after.trim().charAt(0) : '\0';
+                            cxs.addProduction(s2, beforeChar, afterChar);
+                            systemRules.put(symbol, cxs);
                         } else {
                             ContextSensitiveString cxs = new ContextSensitiveString();
                             String before = sensitiveMatcher.group(2);
