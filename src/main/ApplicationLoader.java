@@ -143,6 +143,7 @@ public class ApplicationLoader {
             boolean imagePreview = false;
             boolean outputTurtleContent = false;
             boolean imageAnimation = false;
+            char[] ignoreChars = new char[0];
 
             //read rules
             HashMap<String, String> systemRuleCollection = inputConfig.get("rules");
@@ -242,6 +243,7 @@ public class ApplicationLoader {
                 config.setPolygonColor(Color.decode(settingsCollection.getOrDefault("polygon_color", "#0000FF")));
                 config.colorIncrement = Float.parseFloat(settingsCollection.getOrDefault("color_increment", "10.0"));
 
+                ignoreChars = settingsCollection.getOrDefault("ignore", "").toCharArray();
                 backgroundColor = Color.decode(settingsCollection.getOrDefault("background_color", "#FFFFFF"));
                 outputImageContent = Boolean.parseBoolean(settingsCollection.getOrDefault("image_output", "True"));
                 outputSystemContent = Boolean.parseBoolean(settingsCollection.getOrDefault("system_output", "False"));
@@ -261,6 +263,7 @@ public class ApplicationLoader {
             }
 
             LSystem mainSystem = new LSystem(axiom, systemRules);
+            mainSystem.addToIgnoreList(ignoreChars);
             long startTime = System.nanoTime();
             for(int i = 1; i <= numGenerations; i++){
                 try {

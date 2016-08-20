@@ -1,6 +1,7 @@
 package lsystem;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 /**
  * L-System
@@ -9,10 +10,17 @@ import java.lang.reflect.Field;
 public class LSystem {
     private RuleSet productionRules;
     private String tape;
+    private ArrayList<Character> ignoreList = new ArrayList<>();
 
     public LSystem(String axiom, RuleSet productions){
         this.tape = axiom;
         this.productionRules = productions;
+    }
+
+    public void addToIgnoreList(char[] chars) {
+        for (char c : chars) {
+            ignoreList.add(c);
+        }
     }
 
     public void step() throws Exception {
@@ -33,13 +41,30 @@ public class LSystem {
                     newTape.append(((StochasticString) production).getRandomProduction());
                 } else if (production instanceof ContextSensitiveString) {
                     String result = ((ContextSensitiveString) production).getProduction((collection) -> {
+                        char leftChar = '\0';
+                        char rightChar = '\0';
+                        int checkerIndex = currentIndex - 1;
+                        while (checkerIndex >= 0 && leftChar == '\0') {
+                            if (!ignoreList.contains(chars[checkerIndex])) {
+                                leftChar = chars[checkerIndex];
+                            }
+                            checkerIndex--;
+                        }
+                        checkerIndex = currentIndex + 1;
+                        while (checkerIndex < chars.length && rightChar == '\0') {
+                            if (!ignoreList.contains(chars[checkerIndex])) {
+                                rightChar = chars[checkerIndex];
+                            }
+                            checkerIndex++;
+                        }
+
                         if (!collection.isEmptyBefore()) {
                             if (currentIndex <= 0) {
                                 if (collection.getBefore() != '<') {  //match begin string
                                     return false;
                                 }
                             } else if (currentIndex > 0) {
-                                if (collection.getBefore() != chars[currentIndex - 1]) {
+                                if (collection.getBefore() != leftChar) {
                                     return false;
                                 }
                             }
@@ -50,7 +75,7 @@ public class LSystem {
                                     return false;
                                 }
                             } else if (currentIndex < chars.length - 1) {
-                                if (collection.getAfter() != chars[currentIndex + 1]) {
+                                if (collection.getAfter() != rightChar) {
                                     return false;
                                 }
                             }

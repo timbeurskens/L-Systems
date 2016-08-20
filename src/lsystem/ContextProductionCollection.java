@@ -11,8 +11,8 @@ public class ContextProductionCollection {
 
     public ContextProductionCollection(String p, char b, char a) {
         this.production = p;
-        this.before = b;
-        this.after = a;
+        this.before = b != '?' ? b : '\0';
+        this.after = a != '?' ? a : '\0';
     }
 
     public ContextProductionCollection(String p) {

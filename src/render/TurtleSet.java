@@ -1,5 +1,6 @@
 package render;
 
+import lsystem.ContextSensitiveString;
 import lsystem.RuleSet;
 import lsystem.StochasticString;
 
@@ -26,6 +27,13 @@ public class TurtleSet extends RuleSet {
             }else if(s instanceof StochasticString){
                 ((StochasticString) s).getElements().forEach(stringPermutationCollection -> {
                     char[] production = stringPermutationCollection.getProduction().toCharArray();
+                    for (char aProduction : production) {
+                        addEmpty(aProduction);
+                    }
+                });
+            } else if (s instanceof ContextSensitiveString) {
+                ((ContextSensitiveString) s).getElements().forEach(contextProductionCollection -> {
+                    char[] production = contextProductionCollection.getProduction().toCharArray();
                     for (char aProduction : production) {
                         addEmpty(aProduction);
                     }
