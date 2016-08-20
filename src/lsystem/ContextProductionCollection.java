@@ -11,8 +11,8 @@ public class ContextProductionCollection {
 
     public ContextProductionCollection(String p, char b, char a) {
         this.production = p;
-        this.before = b != '?' ? b : '\0';
-        this.after = a != '?' ? a : '\0';
+        this.before = b;
+        this.after = a;
     }
 
     public ContextProductionCollection(String p) {
@@ -29,6 +29,14 @@ public class ContextProductionCollection {
 
     public boolean isEmptyAfter() {
         return after == '\0';
+    }
+
+    public boolean isAnyAfter() {
+        return after == '?';
+    }
+
+    public boolean isAnyBefore() {
+        return before == '?';
     }
 
     public char getBefore() {

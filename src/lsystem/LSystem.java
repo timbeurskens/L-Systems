@@ -41,18 +41,31 @@ public class LSystem {
                     newTape.append(((StochasticString) production).getRandomProduction());
                 } else if (production instanceof ContextSensitiveString) {
                     String result = ((ContextSensitiveString) production).getProduction((collection) -> {
+                        //CONTEXT MATCHER:
                         char leftChar = '\0';
                         char rightChar = '\0';
                         int checkerIndex = currentIndex - 1;
-                        while (checkerIndex >= 0 && leftChar == '\0') {
-                            if (!ignoreList.contains(chars[checkerIndex])) {
+                        int layer = 0;
+                        while (checkerIndex >= 0 && leftChar == '\0' && layer >= 0) {
+                            if (chars[checkerIndex] == '[') {
+                                layer++;
+                            } else if (chars[checkerIndex] == ']') {
+                                layer--;
+                            }
+                            if (!ignoreList.contains(chars[checkerIndex]) && layer == 0) {
                                 leftChar = chars[checkerIndex];
                             }
                             checkerIndex--;
                         }
                         checkerIndex = currentIndex + 1;
-                        while (checkerIndex < chars.length && rightChar == '\0') {
-                            if (!ignoreList.contains(chars[checkerIndex])) {
+                        layer = 0;
+                        while (checkerIndex < chars.length && rightChar == '\0' && layer >= 0) {
+                            if (chars[checkerIndex] == '[') {
+                                layer++;
+                            } else if (chars[checkerIndex] == ']') {
+                                layer--;
+                            }
+                            if (!ignoreList.contains(chars[checkerIndex]) && layer == 0) {
                                 rightChar = chars[checkerIndex];
                             }
                             checkerIndex++;
@@ -64,7 +77,7 @@ public class LSystem {
                                     return false;
                                 }
                             } else if (currentIndex > 0) {
-                                if (collection.getBefore() != leftChar) {
+                                if ((!collection.isAnyBefore()) && collection.getBefore() != leftChar) {
                                     return false;
                                 }
                             }
@@ -75,7 +88,7 @@ public class LSystem {
                                     return false;
                                 }
                             } else if (currentIndex < chars.length - 1) {
-                                if (collection.getAfter() != rightChar) {
+                                if ((!collection.isAnyAfter()) && collection.getAfter() != rightChar) {
                                     return false;
                                 }
                             }
