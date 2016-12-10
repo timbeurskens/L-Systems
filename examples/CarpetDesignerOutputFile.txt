@@ -1,5 +1,5 @@
 [rules]
-B=[BBBBB]+w-[Bhhhh]+w-[BhBBB]+w-[BhBhh]+w-[BhBhB][+w]-wwww+hhhhh
+B=[hhBhh]+w-[hBhBh]+w-[BhhhB]+w-[hBhBh]+w-[hhBhh][+w]-wwww+hhhhh
 w=wwwww
 h=hhhhh
 [turtle]
@@ -13,7 +13,7 @@ turtle_output=false
 color=#FF0000
 image_output=false
 image_animation=false
-length=5
+length=2
 image_preview=true
-generations=5
+generations=8
 polygon_color=#000000

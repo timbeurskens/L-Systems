@@ -1,14 +1,14 @@
 package lsystem;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * L-System
  * Created by s154796 on 8-7-2016.
  */
 public class StochasticString {
-    private ArrayList<StringPermutationCollection> elements = new ArrayList<>();
+    private HashSet<StringPermutationCollection> elements = new HashSet<>();
 
     public void addProduction(String str, double p){
         StringPermutationCollection spc = new StringPermutationCollection(str, (int) (p * 1000));
@@ -26,7 +26,7 @@ public class StochasticString {
         return null;
     }
 
-    public List<StringPermutationCollection> getElements(){
+    public Set<StringPermutationCollection> getElements(){
         return elements;
     }
 

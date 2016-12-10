@@ -4,6 +4,8 @@ import lsystem.ContextSensitiveString;
 import lsystem.RuleSet;
 import lsystem.StochasticString;
 
+import java.util.HashSet;
+
 /**
  * L-System
  * Created by s154796 on 3-7-2016.

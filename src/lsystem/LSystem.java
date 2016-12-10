@@ -1,16 +1,39 @@
 package lsystem;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * L-System
  * Created by s154796 on 3-7-2016.
  */
+
+/**
+ * More optimal string replacer
+ *
+ Map<String,String> tokens = new HashMap<String,String>();
+ tokens.put("cat", "Garfield");
+ tokens.put("beverage", "coffee");
+
+ String template = "%cat% really needs some %beverage%.";
+
+ // Create pattern of the format "%(cat|beverage)%"
+ String patternString = "%(" + StringUtils.join(tokens.keySet(), "|") + ")%";
+ Pattern pattern = Pattern.compile(patternString);
+ Matcher matcher = pattern.matcher(template);
+
+ StringBuffer sb = new StringBuffer();
+ while(matcher.find()) {
+ matcher.appendReplacement(sb, tokens.get(matcher.group(1)));
+ }
+ matcher.appendTail(sb);
+
+ System.out.println(sb.toString());
+ */
 public class LSystem {
     private RuleSet productionRules;
     private String tape;
-    private ArrayList<Character> ignoreList = new ArrayList<>();
+    private HashSet<Character> ignoreList = new HashSet<>();
 
     public LSystem(String axiom, RuleSet productions){
         this.tape = axiom;
@@ -44,8 +67,10 @@ public class LSystem {
                         //CONTEXT MATCHER:
                         char leftChar = '\0';
                         char rightChar = '\0';
+
                         int checkerIndex = currentIndex - 1;
                         int layer = 0;
+
                         while (checkerIndex >= 0 && leftChar == '\0' && layer >= 0) {
                             if (chars[checkerIndex] == '[') {
                                 layer++;
@@ -57,8 +82,14 @@ public class LSystem {
                             }
                             checkerIndex--;
                         }
+
+                        if(checkerIndex < 0 && leftChar == '\0' && layer >= 0){
+                            leftChar = '<';
+                        }
+
                         checkerIndex = currentIndex + 1;
                         layer = 0;
+
                         while (checkerIndex < chars.length && rightChar == '\0' && layer >= 0) {
                             if (chars[checkerIndex] == '[') {
                                 layer++;
@@ -71,8 +102,17 @@ public class LSystem {
                             checkerIndex++;
                         }
 
+                        if(checkerIndex >= chars.length && leftChar == '\0' && layer >= 0){
+                            rightChar = '>';
+                        }
+
+                        System.out.println(leftChar + "<" + chars[currentIndex] + ">" + rightChar + " - " + collection.getBefore() + "<" + chars[currentIndex] + ">" + collection.getAfter());
+
                         if (!collection.isEmptyBefore()) {
-                            if (currentIndex <= 0) {
+                            if(!collection.isAnyBefore() && collection.getBefore() != leftChar){
+                                return false;
+                            }
+                            /*if (currentIndex <= 0) {
                                 if (collection.getBefore() != '<') {  //match begin string
                                     return false;
                                 }
@@ -80,10 +120,14 @@ public class LSystem {
                                 if ((!collection.isAnyBefore()) && collection.getBefore() != leftChar) {
                                     return false;
                                 }
-                            }
+                            }*/
                         }
+
                         if (!collection.isEmptyAfter()) {
-                            if (currentIndex >= chars.length - 1) {
+                            if(!collection.isAnyAfter() && collection.getAfter() != rightChar){
+                                return false;
+                            }
+                            /*if (currentIndex >= chars.length - 1) {
                                 if (collection.getAfter() != '>') {  //match end string
                                     return false;
                                 }
@@ -91,7 +135,7 @@ public class LSystem {
                                 if ((!collection.isAnyAfter()) && collection.getAfter() != rightChar) {
                                     return false;
                                 }
-                            }
+                            }*/
                         }
                         return true;
                     });

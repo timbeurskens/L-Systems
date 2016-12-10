@@ -1,14 +1,14 @@
 package lsystem;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * L-System
  * Created by s154796 on 19-8-2016.
  */
 public class ContextSensitiveString {
-    private ArrayList<ContextProductionCollection> elements = new ArrayList<>();
+    private HashSet<ContextProductionCollection> elements = new HashSet<>();
 
     public void addProduction(String p, char b, char a) {
         ContextProductionCollection cpc = new ContextProductionCollection(p, b, a);
@@ -20,7 +20,7 @@ public class ContextSensitiveString {
         elements.add(cpc);
     }
 
-    public List<ContextProductionCollection> getElements() {
+    public Set<ContextProductionCollection> getElements() {
         return elements;
     }
 
@@ -29,11 +29,14 @@ public class ContextSensitiveString {
         String currentProduction = null;
         for (ContextProductionCollection element : elements) {
             if (checker.check(element)) {
+                System.out.println("Match");
                 int score = element.getScore();
                 if (score > numMatches) {
                     numMatches = score;
                     currentProduction = element.getProduction();
                 }
+            }else{
+                System.out.println("No match");
             }
         }
         return currentProduction;
