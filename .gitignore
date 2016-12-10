@@ -3,3 +3,8 @@ examples/
 .idea/
 *.png
 *.txt
+*.jar
+*.bat
+/.idea/
+/out/
+/examples/
