@@ -11,6 +11,7 @@ import render.*;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.HashMap;
@@ -22,12 +23,12 @@ import java.util.regex.Pattern;
  * Created by s154796 on 3-7-2016.
  */
 public class ApplicationLoader {
-    static Pattern  sectionPattern  = Pattern.compile( "\\s*\\[([^]]*)\\]\\s*" );
-    static Pattern keyValuePattern = Pattern.compile( "\\s*([^=]*)=(.*)" );
+    static Pattern sectionPattern = Pattern.compile("\\s*\\[([^]]*)\\]\\s*");
+    static Pattern keyValuePattern = Pattern.compile("\\s*([^=]*)=(.*)");
     static Pattern stochasticPattern = Pattern.compile("(\\S)[0-9]?\\[([^]]*)\\]");
     static Pattern contextSensitivePattern = Pattern.compile("((\\S)<)?(\\S)(>(\\S))?");
 
-    private static HashMap<String, HashMap<String, String>> readConfiguration(String filename) throws IOException{
+    private static HashMap<String, HashMap<String, String>> readConfiguration(String filename) throws IOException {
         HashMap<String, HashMap<String, String>> configuration = new HashMap<>();
 
         BufferedReader fileReader = null;
@@ -41,17 +42,17 @@ public class ApplicationLoader {
         String line;
         String section = null;
         if (fileReader != null) {
-            while((line = fileReader.readLine()) != null){
+            while ((line = fileReader.readLine()) != null) {
                 Matcher sectionMatcher = sectionPattern.matcher(line);
                 Matcher keyValueMatcher = keyValuePattern.matcher(line);
-                if(sectionMatcher.matches()){
+                if (sectionMatcher.matches()) {
                     section = sectionMatcher.group(1).trim();
-                }else if(section != null){
-                    if(keyValueMatcher.matches()){
+                } else if (section != null) {
+                    if (keyValueMatcher.matches()) {
                         String key = keyValueMatcher.group(1).trim();
                         String value = keyValueMatcher.group(2).trim();
                         HashMap<String, String> sectionEntries = configuration.get(section);
-                        if(sectionEntries == null){
+                        if (sectionEntries == null) {
                             configuration.put(section, sectionEntries = new HashMap<>());
                         }
                         sectionEntries.put(key, value);
@@ -63,7 +64,7 @@ public class ApplicationLoader {
         return configuration;
     }
 
-    public static String outputTextContent(String filename, String content){
+    public static String outputTextContent(String filename, String content) {
         File systemOutputFilePointer = new File(filename);
         FileWriter systemOutputStream = null;
         try {
@@ -71,7 +72,7 @@ public class ApplicationLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if(systemOutputStream != null){
+        if (systemOutputStream != null) {
             try {
                 systemOutputStream.write(content);
             } catch (IOException e) {
@@ -91,8 +92,7 @@ public class ApplicationLoader {
         return systemOutputFilePointer.getAbsolutePath();
     }
 
-    private static BufferedImage createCompatibleImage(int width, int height)
-    {
+    private static BufferedImage createCompatibleImage(int width, int height) {
         // obtain the current system graphical settings
         GraphicsConfiguration gfx_config = GraphicsEnvironment.
                 getLocalGraphicsEnvironment().getDefaultScreenDevice().
@@ -105,11 +105,11 @@ public class ApplicationLoader {
         return new_image;
     }
 
-    public static void main(String[] args){
-        for(String inputFileName : args){
+    public static void main(String[] args) {
+        for (String inputFileName : args) {
             File inputFile = new File(inputFileName);
             HashMap<String, HashMap<String, String>> inputConfig = null;
-            if(!inputFile.exists() || !inputFile.canRead()){
+            if (!inputFile.exists() || !inputFile.canRead()) {
                 System.out.println("Cannot read file!");
                 return;
             }
@@ -120,7 +120,7 @@ public class ApplicationLoader {
                 e.printStackTrace();
             }
 
-            if(inputConfig == null){
+            if (inputConfig == null) {
                 System.out.println("Something went wrong reading the config file");
                 return;
             }
@@ -128,6 +128,7 @@ public class ApplicationLoader {
             String imageOutputFile = inputFileName + "_output_image.png";
             String systemOutputFile = inputFileName + "_output_system.txt";
             String turtleOutputFile = inputFileName + "_output_turtle.txt";
+            String svgOutputFile = inputFileName + "_output_turtle.svg";
 
             TurtleConfig config = new TurtleConfig();
             TurtleConfig secondConfig = new TurtleConfig();
@@ -142,12 +143,13 @@ public class ApplicationLoader {
             boolean outputImageContent = true;
             boolean imagePreview = false;
             boolean outputTurtleContent = false;
+            boolean outputSVGContent = false;
             boolean imageAnimation = false;
             char[] ignoreChars = new char[0];
 
             //read rules
             HashMap<String, String> systemRuleCollection = inputConfig.get("rules");
-            if(systemRuleCollection != null){
+            if (systemRuleCollection != null) {
                 systemRuleCollection.forEach((s, s2) -> {
                     Matcher stochasticMatcher = stochasticPattern.matcher(s);
                     Matcher sensitiveMatcher = contextSensitivePattern.matcher(s);
@@ -162,18 +164,18 @@ public class ApplicationLoader {
                         } else {
                             systemRules.put(key, s2);
                         }
-                    }else if(stochasticMatcher.matches()){
+                    } else if (stochasticMatcher.matches()) {
                         char symbol = stochasticMatcher.group(1).trim().charAt(0);
-                        if(systemRules.containsKey(symbol)){
+                        if (systemRules.containsKey(symbol)) {
                             Object ruleProduction = systemRules.get(symbol);
-                            if(ruleProduction instanceof StochasticString){
+                            if (ruleProduction instanceof StochasticString) {
                                 ((StochasticString) ruleProduction).addProduction(s2, Double.parseDouble(stochasticMatcher.group(2).trim()));
-                            }else{
+                            } else {
                                 StochasticString ss = new StochasticString();
                                 ss.addProduction(s2, Double.parseDouble(stochasticMatcher.group(2).trim()));
                                 systemRules.put(symbol, ss);
                             }
-                        }else{
+                        } else {
                             StochasticString ss = new StochasticString();
                             ss.addProduction(s2, Double.parseDouble(stochasticMatcher.group(2).trim()));
                             systemRules.put(symbol, ss);
@@ -218,9 +220,9 @@ public class ApplicationLoader {
 
             //read turtle rules
             HashMap<String, String> turtleRuleCollection = inputConfig.get("turtle");
-            if(turtleRuleCollection != null){
+            if (turtleRuleCollection != null) {
                 turtleRuleCollection.forEach((s, s2) -> {
-                    if(s.length() == 1){
+                    if (s.length() == 1) {
                         turtleRules.put(s.charAt(0), s2);
                     }
                 });
@@ -230,7 +232,7 @@ public class ApplicationLoader {
 
             //read settings
             HashMap<String, String> settingsCollection = inputConfig.get("settings");
-            if(settingsCollection != null){
+            if (settingsCollection != null) {
                 axiom = settingsCollection.getOrDefault("axiom", "");
                 numGenerations = Integer.parseInt(settingsCollection.getOrDefault("generations", "4"));
                 imageBorder = Integer.parseInt(settingsCollection.getOrDefault("imageborder", "10"));
@@ -248,6 +250,7 @@ public class ApplicationLoader {
                 outputImageContent = Boolean.parseBoolean(settingsCollection.getOrDefault("image_output", "True"));
                 outputSystemContent = Boolean.parseBoolean(settingsCollection.getOrDefault("system_output", "False"));
                 outputTurtleContent = Boolean.parseBoolean(settingsCollection.getOrDefault("turtle_output", "False"));
+                outputSVGContent = Boolean.parseBoolean(settingsCollection.getOrDefault("svg_output", "False"));
                 imagePreview = Boolean.parseBoolean(settingsCollection.getOrDefault("image_preview", "False"));
                 imageAnimation = Boolean.parseBoolean(settingsCollection.getOrDefault("image_animation", "False"));
             }
@@ -256,41 +259,39 @@ public class ApplicationLoader {
 
             System.out.println("Axiom: " + axiom);
 
-            try {
-                secondConfig = config.clone();
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
+
+            secondConfig = config.clone();
+
 
             LSystem mainSystem = new LSystem(axiom, systemRules);
             mainSystem.addToIgnoreList(ignoreChars);
             long startTime = System.nanoTime();
-            for(int i = 1; i <= numGenerations; i++){
+            for (int i = 1; i <= numGenerations; i++) {
                 try {
                     mainSystem.step();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 final int sysLength = mainSystem.getTapeLength();
-                if(sysLength < 150){
+                if (sysLength < 150) {
                     System.out.println("Generation " + i + ": " + mainSystem.getTape());
-                }else{
+                } else {
                     System.out.println("Generation " + i + ": [large output:" + sysLength + "]");
                 }
             }
-            long timeDiff = (System.nanoTime() - startTime)/1000000;
+            long timeDiff = (System.nanoTime() - startTime) / 1000000;
             System.out.println("Duration: " + timeDiff + "ms");
 
             String systemOutput = mainSystem.getTape();
 
             mainSystem = null;
 
-            if(outputSystemContent){
+            if (outputSystemContent) {
                 System.out.println(outputTextContent(systemOutputFile, systemOutput));
             }
 
             String turtleInputString = "";
-            if(outputTurtleContent || outputImageContent || imagePreview || imageAnimation){
+            if (outputTurtleContent || outputImageContent || imagePreview || imageAnimation || outputSVGContent) {
                 LSystem turtlePrepareSystem = new LSystem(systemOutput, turtleRules);
                 try {
                     turtlePrepareSystem.step();
@@ -302,12 +303,15 @@ public class ApplicationLoader {
                 turtlePrepareSystem = null;
             }
 
-            if(outputTurtleContent){
+            if (outputTurtleContent) {
                 System.out.println(outputTextContent(turtleOutputFile, turtleInputString));
             }
 
-            if(outputImageContent || imagePreview || imageAnimation){
-                Turtle turtle = new Turtle(turtleInputString, config);
+            Turtle turtle = null;
+            TurtleConfig svgConfig = null;
+
+            if (outputImageContent || imagePreview || imageAnimation) {
+                turtle = new Turtle(turtleInputString, config);
                 try {
                     turtle.render();
                 } catch (Exception e) {
@@ -316,20 +320,19 @@ public class ApplicationLoader {
 
                 secondConfig.x = -turtle.minX + imageBorder;
                 secondConfig.y = -turtle.minY + imageBorder;
+                svgConfig = secondConfig.clone();
                 turtle.setInitialConfig(secondConfig);
 
-                int width = (int)Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
-                int height = (int)Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
+                int width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
+                int height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
 
                 System.out.println("Image size: " + width + "x" + height);
 
-                if(imageAnimation){
+                if (imageAnimation) {
                     StepTurtle sTurtle = null;
-                    try {
-                        sTurtle = new StepTurtle(turtleInputString, secondConfig.clone());
-                    } catch (CloneNotSupportedException e) {
-                        e.printStackTrace();
-                    }
+
+                    sTurtle = new StepTurtle(turtleInputString, secondConfig.clone());
+
                     TurtleAnimator animator = new TurtleAnimator(sTurtle, width, height, backgroundColor);
                     animator.initialize();
                     turtle.reset();
@@ -345,8 +348,8 @@ public class ApplicationLoader {
                     @Override
                     public void drawLine(double x1, double x2, double y1, double y2, double width, Color color) {
                         graphics.setColor(color);
-                        graphics.setStroke(new BasicStroke((float)(width >= 0 ? width : 0)));
-                        graphics.drawLine((int)x1, (int)y1, (int)x2, (int)y2);
+                        graphics.setStroke(new BasicStroke((float) (width >= 0 ? width : 0)));
+                        graphics.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
                     }
 
                     @Override
@@ -356,6 +359,11 @@ public class ApplicationLoader {
                         //graphics.fillPolygon(polygon);
                         graphics.fill(polygon);
                     }
+
+                    @Override
+                    public void end() {
+
+                    }
                 });
 
                 try {
@@ -364,15 +372,15 @@ public class ApplicationLoader {
                     e.printStackTrace();
                 }
 
-                turtle = null;
+                //turtle = null;
                 graphics.dispose();
 
-                if(imagePreview){
+                if (imagePreview) {
                     ImagePreviewer imgp = new ImagePreviewer(img);
                     imgp.initialize();
                 }
 
-                if(outputImageContent){
+                if (outputImageContent) {
                     System.out.println("Saving image in background..");
 
                     new Thread(() -> {
@@ -385,6 +393,150 @@ public class ApplicationLoader {
                         System.out.println(imageOutput.getAbsolutePath());
                     }).start();
                 }
+            }
+
+            if (outputSVGContent) {
+                if (turtle == null) {
+                    turtle = new Turtle(turtleInputString, config);
+                    try {
+                        turtle.render();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    secondConfig.x = -turtle.minX + imageBorder;
+                    secondConfig.y = -turtle.minY + imageBorder;
+                    turtle.setInitialConfig(secondConfig);
+                } else {
+                    turtle.setInitialConfig(svgConfig);
+                }
+
+
+                int width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
+                int height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
+                System.out.println("SVG size: " + width + "x" + height);
+
+                try {
+                    FileWriter svgOut = new FileWriter(svgOutputFile);
+
+                    String startSvgFile = "<svg width=\"" + width + "\" height=\"" + height + "\" viewPort=\"0 0 " + width + " " + height + "\" xmlns=\"http://www.w3.org/2000/svg\">";
+                    String endSvgFile = "</svg>";
+
+                    svgOut.write(startSvgFile);
+
+                    GraphicsListener gl = new GraphicsListener() {
+                        Color lastColor = null;
+                        double lastWidth = -1;
+
+                        boolean activePath = false;
+
+                        String getHex(Color c) {
+                            return String.format("#%06x", c.getRGB() & 0x00FFFFFF);
+                        }
+
+                        public void startPath(double x, double y, Color stroke, double width) {
+                            startPath(x, y, getHex(stroke), width, "transparent");
+                        }
+
+                        public void startPath(double x, double y, Color stroke, double width, Color fill) {
+                            startPath(x, y, getHex(stroke), width, getHex(fill));
+                        }
+
+                        public void startPath(double x, double y, String stroke, double width, String fill) {
+                            if (activePath) {
+                                endPath();
+                            }
+
+                            activePath = true;
+                            String pathStart = "<path stroke-width=\"" + width + "\" fill=\"" + fill + "\" stroke=\"" + stroke + "\" d=\"M " + x + " " + y;
+                            try {
+                                svgOut.write(pathStart);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        public void appendPath(double x, double y) {
+                            if (activePath) {
+                                String append = " L " + x + " " + y;
+                                try {
+                                    svgOut.write(append);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+                        public void endPath() {
+                            if (activePath) {
+                                activePath = false;
+                                String pathEnd = "\"/>";
+                                try {
+                                    svgOut.write(pathEnd);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void drawLine(double x1, double x2, double y1, double y2, double width, Color color) {
+                            if (color == lastColor && lastWidth == width) {
+                                appendPath(x2, y2);
+                            } else {
+                                startPath(x1, y1, color, width);
+                                appendPath(x2, y2);
+                            }
+
+                            lastWidth = width;
+                            lastColor = color;
+                        }
+
+                        @Override
+                        public void fillPath(GeneralPath polygon, Color color) {
+                            endPath();
+                            PathIterator pi = polygon.getPathIterator(null);
+                            double[] coords = new double[2];
+                            int type;
+                            while (!pi.isDone()) {
+                                type = pi.currentSegment(coords);
+                                if (!activePath) {
+                                    startPath(coords[0], coords[1], Color.BLACK, 1, color);
+                                } else {
+                                    appendPath(coords[0], coords[1]);
+                                }
+                                pi.next();
+                            }
+                        }
+
+                        @Override
+                        public void end() {
+                            endPath();
+                        }
+                    };
+
+                    turtle.setGraphicsListener(gl);
+
+                    turtle.render();
+
+                    svgOut.write(endSvgFile);
+
+                    svgOut.flush();
+                    svgOut.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                //initialize svg file:
+                /***
+                 * <svg width="120" height="120" viewPort="0 0 120 120"
+                 xmlns="http://www.w3.org/2000/svg">
+
+                 <polygon points="60,20 100,40 100,80 60,100 20,80 20,40"/>
+                 </svg>
+                 */
+
+
             }
         }
     }

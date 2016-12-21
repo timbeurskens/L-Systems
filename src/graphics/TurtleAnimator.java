@@ -100,6 +100,11 @@ public class TurtleAnimator extends JFrame {
                     p.imageGraphics.fill(polygon);
                     p.repaint();
                 }
+
+                @Override
+                public void end() {
+
+                }
             });
 
             resetButton.addActionListener(e -> {

@@ -10,4 +10,6 @@ import java.awt.geom.GeneralPath;
 public interface GraphicsListener {
     void drawLine(double x1, double x2, double y1, double y2, double width, Color color);
     void fillPath(GeneralPath polygon, Color color);
+
+    void end();
 }

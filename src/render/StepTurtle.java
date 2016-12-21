@@ -1,7 +1,5 @@
 package render;
 
-import java.lang.reflect.Field;
-
 /**
  * L-System
  * Created by s154796 on 8-7-2016.
@@ -22,6 +20,9 @@ public class StepTurtle extends Turtle{
             currentTapePosition++;
             return true;
         }else{
+            if (listener != null) {
+                listener.end();
+            }
             return false;
         }
     }
