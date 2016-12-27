@@ -16,3 +16,4 @@ polygon_color=#228B22
 turtle_output=false
 image_preview=true
 image_animation=false
+svg_output=true

@@ -310,6 +310,9 @@ public class ApplicationLoader {
             Turtle turtle = null;
             TurtleConfig svgConfig = null;
 
+            int width = -1;
+            int height = -1;
+
             if (outputImageContent || imagePreview || imageAnimation) {
                 turtle = new Turtle(turtleInputString, config);
                 try {
@@ -323,8 +326,8 @@ public class ApplicationLoader {
                 svgConfig = secondConfig.clone();
                 turtle.setInitialConfig(secondConfig);
 
-                int width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
-                int height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
+                width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
+                height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
 
                 System.out.println("Image size: " + width + "x" + height);
 
@@ -406,14 +409,15 @@ public class ApplicationLoader {
 
                     secondConfig.x = -turtle.minX + imageBorder;
                     secondConfig.y = -turtle.minY + imageBorder;
+
                     turtle.setInitialConfig(secondConfig);
+
+                    width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
+                    height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
                 } else {
                     turtle.setInitialConfig(svgConfig);
                 }
 
-
-                int width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
-                int height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
                 System.out.println("SVG size: " + width + "x" + height);
 
                 try {
@@ -429,6 +433,9 @@ public class ApplicationLoader {
                         double lastWidth = -1;
 
                         boolean activePath = false;
+
+                        double px = -1;
+                        double py = -1;
 
                         String getHex(Color c) {
                             return String.format("#%06x", c.getRGB() & 0x00FFFFFF);
@@ -449,6 +456,10 @@ public class ApplicationLoader {
 
                             activePath = true;
                             String pathStart = "<path stroke-width=\"" + width + "\" fill=\"" + fill + "\" stroke=\"" + stroke + "\" d=\"M " + x + " " + y;
+
+                            px = x;
+                            py = y;
+
                             try {
                                 svgOut.write(pathStart);
                             } catch (IOException e) {
@@ -456,14 +467,22 @@ public class ApplicationLoader {
                             }
                         }
 
-                        public void appendPath(double x, double y) {
+                        public void appendPath(double x1, double y1, double x2, double y2) {
                             if (activePath) {
-                                String append = " L " + x + " " + y;
+                                String append = "";
+                                if (!(x1 == px && y1 == py)) {
+                                    append += " M " + x1 + " " + y1;
+                                }
+
+                                append += " L " + x2 + " " + y2;
                                 try {
                                     svgOut.write(append);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
+
+                                px = x2;
+                                py = y2;
                             }
                         }
 
@@ -482,10 +501,10 @@ public class ApplicationLoader {
                         @Override
                         public void drawLine(double x1, double x2, double y1, double y2, double width, Color color) {
                             if (color == lastColor && lastWidth == width) {
-                                appendPath(x2, y2);
+                                appendPath(x1, y1, x2, y2);
                             } else {
                                 startPath(x1, y1, color, width);
-                                appendPath(x2, y2);
+                                appendPath(x1, y1, x2, y2);
                             }
 
                             lastWidth = width;
@@ -501,9 +520,9 @@ public class ApplicationLoader {
                             while (!pi.isDone()) {
                                 type = pi.currentSegment(coords);
                                 if (!activePath) {
-                                    startPath(coords[0], coords[1], Color.BLACK, 1, color);
+                                    startPath(coords[0], coords[1], Color.BLACK, 0, color);
                                 } else {
-                                    appendPath(coords[0], coords[1]);
+                                    appendPath(px, py, coords[0], coords[1]);
                                 }
                                 pi.next();
                             }
@@ -526,16 +545,6 @@ public class ApplicationLoader {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-                //initialize svg file:
-                /***
-                 * <svg width="120" height="120" viewPort="0 0 120 120"
-                 xmlns="http://www.w3.org/2000/svg">
-
-                 <polygon points="60,20 100,40 100,80 60,100 20,80 20,40"/>
-                 </svg>
-                 */
-
 
             }
         }
