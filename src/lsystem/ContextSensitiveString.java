@@ -45,9 +45,13 @@ public class ContextSensitiveString {
     @Override
     public String toString() {
         StringBuilder strb = new StringBuilder();
-        elements.forEach(contextProductionCollection -> {
-            strb.append(contextProductionCollection.getProduction()).append("(").append(contextProductionCollection.getBefore()).append("<>").append(contextProductionCollection.getAfter()).append(")").append(", ");
-        });
+        elements.forEach(contextProductionCollection -> strb
+            .append(contextProductionCollection.getProduction())
+            .append("(")
+            .append(contextProductionCollection.getBefore())
+            .append("<>")
+            .append(contextProductionCollection.getAfter())
+            .append(")").append(", "));
         return strb.toString();
     }
 }

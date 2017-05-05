@@ -1,7 +1,6 @@
 package lsystem;
 
 import java.util.HashMap;
-import java.util.function.BiConsumer;
 
 /**
  * L-System
@@ -10,8 +9,6 @@ import java.util.function.BiConsumer;
 public class RuleSet extends HashMap<Character, Object>{
     public void printRules(){
         System.out.println("Ruleset:");
-        this.forEach((character, s) -> {
-            System.out.println(character + " -> " + s);
-        });
+        this.forEach((character, s) -> System.out.println(character + " -> " + s));
     }
 }

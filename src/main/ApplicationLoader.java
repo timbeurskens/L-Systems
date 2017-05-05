@@ -7,11 +7,11 @@ import lsystem.LSystem;
 import lsystem.RuleSet;
 import lsystem.StochasticString;
 import render.*;
+import render.renderers.SVGCompiler;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.HashMap;
@@ -23,10 +23,10 @@ import java.util.regex.Pattern;
  * Created by s154796 on 3-7-2016.
  */
 public class ApplicationLoader {
-    static Pattern sectionPattern = Pattern.compile("\\s*\\[([^]]*)\\]\\s*");
-    static Pattern keyValuePattern = Pattern.compile("\\s*([^=]*)=(.*)");
-    static Pattern stochasticPattern = Pattern.compile("(\\S)[0-9]?\\[([^]]*)\\]");
-    static Pattern contextSensitivePattern = Pattern.compile("((\\S)<)?(\\S)(>(\\S))?");
+    static final Pattern sectionPattern = Pattern.compile("\\s*\\[([^]]*)]\\s*");
+    static final Pattern keyValuePattern = Pattern.compile("\\s*([^=]*)=(.*)");
+    static final Pattern stochasticPattern = Pattern.compile("(\\S)[0-9]?\\[([^]]*)]");
+    static final Pattern contextSensitivePattern = Pattern.compile("((\\S)<)?(\\S)(>(\\S))?");
 
     private static HashMap<String, HashMap<String, String>> readConfiguration(String filename) throws IOException {
         HashMap<String, HashMap<String, String>> configuration = new HashMap<>();
@@ -51,10 +51,7 @@ public class ApplicationLoader {
                     if (keyValueMatcher.matches()) {
                         String key = keyValueMatcher.group(1).trim();
                         String value = keyValueMatcher.group(2).trim();
-                        HashMap<String, String> sectionEntries = configuration.get(section);
-                        if (sectionEntries == null) {
-                            configuration.put(section, sectionEntries = new HashMap<>());
-                        }
+                        HashMap<String, String> sectionEntries = configuration.computeIfAbsent(section, k -> new HashMap<>());
                         sectionEntries.put(key, value);
                     }
                 }
@@ -131,7 +128,8 @@ public class ApplicationLoader {
             String svgOutputFile = inputFileName + "_output_turtle.svg";
 
             TurtleConfig config = new TurtleConfig();
-            TurtleConfig secondConfig = new TurtleConfig();
+            new TurtleConfig();
+            TurtleConfig secondConfig;
             RuleSet systemRules = new RuleSet();
             TurtleSet turtleRules = new TurtleSet();
             String axiom = "";
@@ -255,13 +253,9 @@ public class ApplicationLoader {
                 imageAnimation = Boolean.parseBoolean(settingsCollection.getOrDefault("image_animation", "False"));
             }
 
-            settingsCollection = null;
-
             System.out.println("Axiom: " + axiom);
 
-
             secondConfig = config.clone();
-
 
             LSystem mainSystem = new LSystem(axiom, systemRules);
             mainSystem.addToIgnoreList(ignoreChars);
@@ -284,8 +278,6 @@ public class ApplicationLoader {
 
             String systemOutput = mainSystem.getTape();
 
-            mainSystem = null;
-
             if (outputSystemContent) {
                 System.out.println(outputTextContent(systemOutputFile, systemOutput));
             }
@@ -300,7 +292,6 @@ public class ApplicationLoader {
                 }
 
                 turtleInputString = turtlePrepareSystem.getTape();
-                turtlePrepareSystem = null;
             }
 
             if (outputTurtleContent) {
@@ -332,7 +323,7 @@ public class ApplicationLoader {
                 System.out.println("Image size: " + width + "x" + height);
 
                 if (imageAnimation) {
-                    StepTurtle sTurtle = null;
+                    StepTurtle sTurtle;
 
                     sTurtle = new StepTurtle(turtleInputString, secondConfig.clone());
 
@@ -375,7 +366,6 @@ public class ApplicationLoader {
                     e.printStackTrace();
                 }
 
-                //turtle = null;
                 graphics.dispose();
 
                 if (imagePreview) {
@@ -421,127 +411,12 @@ public class ApplicationLoader {
                 System.out.println("SVG size: " + width + "x" + height);
 
                 try {
-                    FileWriter svgOut = new FileWriter(svgOutputFile);
-
-                    String startSvgFile = "<svg width=\"" + width + "\" height=\"" + height + "\" viewPort=\"0 0 " + width + " " + height + "\" xmlns=\"http://www.w3.org/2000/svg\">";
-                    String endSvgFile = "</svg>";
-
-                    svgOut.write(startSvgFile);
-
-                    GraphicsListener gl = new GraphicsListener() {
-                        Color lastColor = null;
-                        double lastWidth = -1;
-
-                        boolean activePath = false;
-
-                        double px = -1;
-                        double py = -1;
-
-                        String getHex(Color c) {
-                            return String.format("#%06x", c.getRGB() & 0x00FFFFFF);
-                        }
-
-                        public void startPath(double x, double y, Color stroke, double width) {
-                            startPath(x, y, getHex(stroke), width, "transparent");
-                        }
-
-                        public void startPath(double x, double y, Color stroke, double width, Color fill) {
-                            startPath(x, y, getHex(stroke), width, getHex(fill));
-                        }
-
-                        public void startPath(double x, double y, String stroke, double width, String fill) {
-                            if (activePath) {
-                                endPath();
-                            }
-
-                            activePath = true;
-                            String pathStart = "<path stroke-width=\"" + width + "\" fill=\"" + fill + "\" stroke=\"" + stroke + "\" d=\"M " + x + " " + y;
-
-                            px = x;
-                            py = y;
-
-                            try {
-                                svgOut.write(pathStart);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        public void appendPath(double x1, double y1, double x2, double y2) {
-                            if (activePath) {
-                                String append = "";
-                                if (!(x1 == px && y1 == py)) {
-                                    append += " M " + x1 + " " + y1;
-                                }
-
-                                append += " L " + x2 + " " + y2;
-                                try {
-                                    svgOut.write(append);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-
-                                px = x2;
-                                py = y2;
-                            }
-                        }
-
-                        public void endPath() {
-                            if (activePath) {
-                                activePath = false;
-                                String pathEnd = "\"/>";
-                                try {
-                                    svgOut.write(pathEnd);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void drawLine(double x1, double x2, double y1, double y2, double width, Color color) {
-                            if (color == lastColor && lastWidth == width) {
-                                appendPath(x1, y1, x2, y2);
-                            } else {
-                                startPath(x1, y1, color, width);
-                                appendPath(x1, y1, x2, y2);
-                            }
-
-                            lastWidth = width;
-                            lastColor = color;
-                        }
-
-                        @Override
-                        public void fillPath(GeneralPath polygon, Color color) {
-                            endPath();
-                            PathIterator pi = polygon.getPathIterator(null);
-                            double[] coords = new double[2];
-                            int type;
-                            while (!pi.isDone()) {
-                                type = pi.currentSegment(coords);
-                                if (!activePath) {
-                                    startPath(coords[0], coords[1], Color.BLACK, 0, color);
-                                } else {
-                                    appendPath(px, py, coords[0], coords[1]);
-                                }
-                                pi.next();
-                            }
-                        }
-
-                        @Override
-                        public void end() {
-                            endPath();
-                        }
-                    };
+                    GraphicsListener gl = new SVGCompiler(svgOutputFile, width, height);
 
                     turtle.setGraphicsListener(gl);
 
                     turtle.render();
 
-                    svgOut.write(endSvgFile);
-
-                    svgOut.flush();
-                    svgOut.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
