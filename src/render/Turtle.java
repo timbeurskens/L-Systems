@@ -1,6 +1,9 @@
 package render;
 
 import java.awt.geom.GeneralPath;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.util.Stack;
 
@@ -12,10 +15,13 @@ public class Turtle {
     public double minX = 0, minY = 0, maxX = 0, maxY = 0;
     protected String tape;
     protected GraphicsListener listener;
+    BufferedWriter log;
     private Stack<TurtleConfig> configStack;
     private TurtleConfig currentConfig;
 
     public Turtle(String input, TurtleConfig initialConfig) {
+        log = new BufferedWriter(new OutputStreamWriter(System.out));
+
         configStack = new Stack<>();
         //pathStack = new Stack<>();
         setInitialConfig(initialConfig);
@@ -24,18 +30,22 @@ public class Turtle {
         tape = input;
     }
 
-    static void updateProgress(double progressPercentage) {
+    void updateProgress(double progressPercentage) {
         final int width = 10;
 
-        System.out.print("\r[");
-        int i = 0;
-        for (; i <= (int) (progressPercentage * width); i++) {
-            System.out.print(".");
+        try {
+            log.write("\r[");
+            int i = 0;
+            for (; i <= (int) (progressPercentage * width); i++) {
+                log.write(".");
+            }
+            for (; i < width; i++) {
+                log.write(" ");
+            }
+            log.write("]");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        for (; i < width; i++) {
-            System.out.print(" ");
-        }
-        System.out.print("]");
     }
 
     private void initBoundingBox() {
@@ -116,7 +126,11 @@ public class Turtle {
                 break;
             default:
                     /* TODO: Error checking? */
-                System.out.println("unknown tape symbol: '" + tapeSymbol + "'");
+                try {
+                    log.write("unknown tape symbol: '" + tapeSymbol + "'\n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
     }
 

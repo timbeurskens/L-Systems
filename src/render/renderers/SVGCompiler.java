@@ -5,6 +5,7 @@ import render.GraphicsListener;
 import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -21,10 +22,11 @@ public class SVGCompiler implements GraphicsListener {
     double px = -1;
     double py = -1;
 
-    private FileWriter fw = null;
+    private BufferedWriter fw;
 
     public SVGCompiler(String outputFile, int w, int h) throws IOException {
-        fw = new FileWriter(outputFile);
+        FileWriter filewriter = new FileWriter(outputFile);
+        fw = new BufferedWriter(filewriter);
         String startSvgFile = "<svg width=\"" + w + "\" height=\"" + h + "\" viewPort=\"0 0 " + w + " " + h + "\" xmlns=\"http://www.w3.org/2000/svg\">";
 
         fw.write(startSvgFile);

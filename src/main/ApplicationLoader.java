@@ -349,24 +349,7 @@ public class ApplicationLoader {
             }
 
             if (outputSVGContent) {
-                if (turtle == null) {
-                    turtle = new Turtle(turtleInputString, config);
-                    try {
-                        turtle.render();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    secondConfig.x = -turtle.minX + imageBorder;
-                    secondConfig.y = -turtle.minY + imageBorder;
-
-                    turtle.setInitialConfig(secondConfig);
-
-                    width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
-                    height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
-                } else {
-                    turtle.setInitialConfig(svgConfig);
-                }
+                turtle.setInitialConfig(svgConfig);
 
                 System.out.println("SVG size: " + width + "x" + height);
 
@@ -388,12 +371,12 @@ public class ApplicationLoader {
                 graphics.dispose();
             }
 
-            if (imagePreview && img != null) {
+            if (imagePreview) {
                 ImagePreviewer imgp = new ImagePreviewer(img);
                 imgp.initialize();
             }
 
-            if (outputImageContent && img != null) {
+            if (outputImageContent) {
                 System.out.println("Saving image in background..");
 
                 BufferedImage finalImg = img;
