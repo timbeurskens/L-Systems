@@ -10,32 +10,32 @@ import java.util.HashSet;
 
 /**
  * More optimal string replacer
- *
- Map<String,String> tokens = new HashMap<String,String>();
- tokens.put("cat", "Garfield");
- tokens.put("beverage", "coffee");
-
- String template = "%cat% really needs some %beverage%.";
-
- // Create pattern of the format "%(cat|beverage)%"
- String patternString = "%(" + StringUtils.join(tokens.keySet(), "|") + ")%";
- Pattern pattern = Pattern.compile(patternString);
- Matcher matcher = pattern.matcher(template);
-
- StringBuffer sb = new StringBuffer();
- while(matcher.find()) {
- matcher.appendReplacement(sb, tokens.get(matcher.group(1)));
- }
- matcher.appendTail(sb);
-
- System.out.println(sb.toString());
+ * <p>
+ * Map<String,String> tokens = new HashMap<String,String>();
+ * tokens.put("cat", "Garfield");
+ * tokens.put("beverage", "coffee");
+ * <p>
+ * String template = "%cat% really needs some %beverage%.";
+ * <p>
+ * // Create pattern of the format "%(cat|beverage)%"
+ * String patternString = "%(" + StringUtils.join(tokens.keySet(), "|") + ")%";
+ * Pattern pattern = Pattern.compile(patternString);
+ * Matcher matcher = pattern.matcher(template);
+ * <p>
+ * StringBuffer sb = new StringBuffer();
+ * while(matcher.find()) {
+ * matcher.appendReplacement(sb, tokens.get(matcher.group(1)));
+ * }
+ * matcher.appendTail(sb);
+ * <p>
+ * System.out.println(sb.toString());
  */
 public class LSystem {
     private RuleSet productionRules;
     private String tape;
     private HashSet<Character> ignoreList = new HashSet<>();
 
-    public LSystem(String axiom, RuleSet productions){
+    public LSystem(String axiom, RuleSet productions) {
         this.tape = axiom;
         this.productionRules = productions;
     }
@@ -54,13 +54,13 @@ public class LSystem {
 
         final char[] chars = (char[]) tapeField.get(oldTape);
         final int len = chars.length;
-        for(int i = 0; i < len; i++){
+        for (int i = 0; i < len; i++) {
             final int currentIndex = i;
             Object production = productionRules.get(chars[i]);
-            if(production != null){
-                if(production instanceof String) {
+            if (production != null) {
+                if (production instanceof String) {
                     newTape.append(production);
-                }else if(production instanceof StochasticString){
+                } else if (production instanceof StochasticString) {
                     newTape.append(((StochasticString) production).getRandomProduction());
                 } else if (production instanceof ContextSensitiveString) {
                     String result = ((ContextSensitiveString) production).getProduction((collection) -> {
@@ -83,7 +83,7 @@ public class LSystem {
                             checkerIndex--;
                         }
 
-                        if(checkerIndex < 0 && leftChar == '\0' && layer >= 0){
+                        if (checkerIndex < 0 && leftChar == '\0' && layer >= 0) {
                             leftChar = '<';
                         }
 
@@ -102,14 +102,14 @@ public class LSystem {
                             checkerIndex++;
                         }
 
-                        if(checkerIndex >= chars.length && leftChar == '\0' && layer >= 0){
+                        if (checkerIndex >= chars.length && rightChar == '\0' && layer >= 0) {
                             rightChar = '>';
                         }
 
-                        System.out.println(leftChar + "<" + chars[currentIndex] + ">" + rightChar + " - " + collection.getBefore() + "<" + chars[currentIndex] + ">" + collection.getAfter());
+                        //System.out.println(leftChar + "<" + chars[currentIndex] + ">" + rightChar + " - " + collection.getBefore() + "<" + chars[currentIndex] + ">" + collection.getAfter());
 
                         if (!collection.isEmptyBefore()) {
-                            if(!collection.isAnyBefore() && collection.getBefore() != leftChar){
+                            if (!collection.isAnyBefore() && collection.getBefore() != leftChar) {
                                 return false;
                             }
                             /*if (currentIndex <= 0) {
@@ -124,7 +124,7 @@ public class LSystem {
                         }
 
                         if (!collection.isEmptyAfter()) {
-                            if(!collection.isAnyAfter() && collection.getAfter() != rightChar){
+                            if (!collection.isAnyAfter() && collection.getAfter() != rightChar) {
                                 return false;
                             }
                             /*if (currentIndex >= chars.length - 1) {
@@ -141,7 +141,7 @@ public class LSystem {
                     });
                     newTape.append(result != null ? result : chars[i]);
                 }
-            }else{
+            } else {
                 newTape.append(chars[i]);
             }
         }
@@ -149,19 +149,19 @@ public class LSystem {
         tape = newTape.toString();
     }
 
-    public String getTape(){
+    public String getTape() {
         return tape;
     }
 
-    public int getTapeLength(){
+    public int getTapeLength() {
         return tape.length();
     }
 
-    public RuleSet getProductionRules(){
+    public RuleSet getProductionRules() {
         return productionRules;
     }
 
-    public void print(){
+    public void print() {
         System.out.println(tape);
     }
 }

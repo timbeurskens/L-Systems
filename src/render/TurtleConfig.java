@@ -108,4 +108,9 @@ public class TurtleConfig implements Cloneable {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return angle + " - " + x + " - " + y;
+    }
 }

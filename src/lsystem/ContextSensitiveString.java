@@ -29,14 +29,14 @@ public class ContextSensitiveString {
         String currentProduction = null;
         for (ContextProductionCollection element : elements) {
             if (checker.check(element)) {
-                System.out.println("Match");
+                //System.out.println("Match");
                 int score = element.getScore();
                 if (score > numMatches) {
                     numMatches = score;
                     currentProduction = element.getProduction();
                 }
             }else{
-                System.out.println("No match");
+                //System.out.println("No match");
             }
         }
         return currentProduction;

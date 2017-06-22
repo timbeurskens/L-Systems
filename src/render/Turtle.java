@@ -199,6 +199,8 @@ public class Turtle {
 
     private void turn(double angle) {
         currentConfig.angle += angle;
+
+        currentConfig.angle = currentConfig.angle % (360.0);
     }
 
     private void lineColorChange(float hueChange) {

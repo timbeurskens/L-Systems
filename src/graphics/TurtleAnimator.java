@@ -55,7 +55,7 @@ public class TurtleAnimator extends JFrame {
             Button resetButton = new Button("Reset");
             controls.add(resetButton);
 
-            JSlider slider = new JSlider(1, 1000);
+            JSlider slider = new JSlider(1, 500);
             slider.setOrientation(JSlider.HORIZONTAL);
 
             slider.addChangeListener(e -> animationTimer.setDelay(1000 / slider.getValue()));

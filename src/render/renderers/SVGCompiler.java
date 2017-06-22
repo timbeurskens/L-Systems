@@ -62,7 +62,7 @@ public class SVGCompiler implements GraphicsListener {
         }
     }
 
-    public void appendPath(double x1, double y1, double x2, double y2) {
+    private void appendPath(double x1, double y1, double x2, double y2) {
         if (activePath) {
             String append = "";
             if (!(x1 == px && y1 == py)) {
@@ -81,7 +81,7 @@ public class SVGCompiler implements GraphicsListener {
         }
     }
 
-    public void endPath() {
+    private void endPath() {
         if (activePath) {
             activePath = false;
             String pathEnd = "\"/>";
@@ -111,9 +111,9 @@ public class SVGCompiler implements GraphicsListener {
         endPath();
         PathIterator pi = polygon.getPathIterator(null);
         double[] coords = new double[2];
-        int type;
+
         while (!pi.isDone()) {
-            type = pi.currentSegment(coords);
+            pi.currentSegment(coords);
             if (!activePath) {
                 startPath(coords[0], coords[1], Color.BLACK, 0, color);
             } else {
@@ -131,7 +131,7 @@ public class SVGCompiler implements GraphicsListener {
             fw.write(endSvgFile);
             fw.flush();
             fw.close();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

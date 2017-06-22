@@ -27,7 +27,7 @@ public class ApplicationLoader {
     static final Pattern sectionPattern = Pattern.compile("\\s*\\[([^]]*)]\\s*");
     static final Pattern keyValuePattern = Pattern.compile("\\s*([^=]*)=(.*)");
     static final Pattern stochasticPattern = Pattern.compile("(\\S)[0-9]?\\[([^]]*)]");
-    static final Pattern contextSensitivePattern = Pattern.compile("((\\S)<)?(\\S)(>(\\S))?");
+    static final Pattern contextSensitivePattern = Pattern.compile("((\\S)?<)?(\\S)(>(\\S)?)?");
 
     private static HashMap<String, HashMap<String, String>> readConfiguration(String filename) throws IOException {
         HashMap<String, HashMap<String, String>> configuration = new HashMap<>();
@@ -315,7 +315,8 @@ public class ApplicationLoader {
 
             secondConfig.x = -turtle.minX + imageBorder;
             secondConfig.y = -turtle.minY + imageBorder;
-            svgConfig = secondConfig.clone();
+
+            //turtle.reset();
             turtle.setInitialConfig(secondConfig);
 
             width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
@@ -349,8 +350,6 @@ public class ApplicationLoader {
             }
 
             if (outputSVGContent) {
-                turtle.setInitialConfig(svgConfig);
-
                 System.out.println("SVG size: " + width + "x" + height);
 
                 try {
@@ -362,6 +361,7 @@ public class ApplicationLoader {
             }
 
             try {
+                System.out.println(turtle.getCurrentConfig());
                 turtle.render();
             } catch (Exception e) {
                 e.printStackTrace();

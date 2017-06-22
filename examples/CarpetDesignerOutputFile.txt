@@ -1,7 +1,7 @@
 [rules]
-B=[BBBBB]+w-[BBhBB]+w-[BhBhB]+w-[BBhBB]+w-[BBBBB]-wwww+hhhhh
-w=wwwww
-h=hhhhh
+B=[hBB]+w-[hBB]+w-[hBh]-ww+hhh
+w=www
+h=hhh
 [turtle]
 B={g+g+g+g+}f
 w=f
@@ -16,5 +16,5 @@ image_animation=true
 length=5
 image_preview=true
 svg_output=false
-generations=4
+generations=6
 polygon_color=#000000
