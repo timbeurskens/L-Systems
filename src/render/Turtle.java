@@ -199,7 +199,7 @@ public class Turtle {
         currentConfig.width += addWidth;
     }
 
-    public void setGraphicsListener(GraphicsListener listener) {
+    public void setListener(GraphicsListener listener) {
         this.listener = listener;
     }
 

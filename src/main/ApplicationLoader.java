@@ -7,11 +7,12 @@ import lsystem.LSystem;
 import lsystem.RuleSet;
 import lsystem.StochasticString;
 import render.*;
+import render.renderers.CompoundListener;
+import render.renderers.GraphicsRenderer;
 import render.renderers.SVGCompiler;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.HashMap;
@@ -92,12 +93,12 @@ public class ApplicationLoader {
     private static BufferedImage createCompatibleImage(int width, int height) {
         // obtain the current system graphical settings
         GraphicsConfiguration gfx_config = GraphicsEnvironment.
-                getLocalGraphicsEnvironment().getDefaultScreenDevice().
-                getDefaultConfiguration();
+            getLocalGraphicsEnvironment().getDefaultScreenDevice().
+            getDefaultConfiguration();
 
         // image is not optimized, so create a new image that is
         BufferedImage new_image = gfx_config.createCompatibleImage(
-                width, height, BufferedImage.TYPE_INT_ARGB);
+            width, height, BufferedImage.TYPE_INT_ARGB);
 
         return new_image;
     }
@@ -125,13 +126,14 @@ public class ApplicationLoader {
             String imageOutputFile = inputFileName + "_output_image.png";
             String systemOutputFile = inputFileName + "_output_system.txt";
             String turtleOutputFile = inputFileName + "_output_turtle.txt";
-            String svgOutputFile = inputFileName + "_output_turtle.svg";
+            String svgOutputFile = inputFileName + "_output_vector.svg";
 
             TurtleConfig config = new TurtleConfig();
-            new TurtleConfig();
-            TurtleConfig secondConfig;
+            TurtleConfig secondConfig = null;
+
             RuleSet systemRules = new RuleSet();
             TurtleSet turtleRules = new TurtleSet();
+
             String axiom = "";
             int numGenerations = 4;
             int imageBorder = 10;
@@ -298,94 +300,52 @@ public class ApplicationLoader {
                 System.out.println(outputTextContent(turtleOutputFile, turtleInputString));
             }
 
-            Turtle turtle = null;
-            TurtleConfig svgConfig = null;
-
             int width = -1;
             int height = -1;
 
-            if (outputImageContent || imagePreview || imageAnimation) {
-                turtle = new Turtle(turtleInputString, config);
-                try {
-                    turtle.render();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            Turtle turtle = new Turtle(turtleInputString, config);
+            TurtleConfig svgConfig = null;
+            CompoundListener listener = new CompoundListener();
 
-                secondConfig.x = -turtle.minX + imageBorder;
-                secondConfig.y = -turtle.minY + imageBorder;
-                svgConfig = secondConfig.clone();
-                turtle.setInitialConfig(secondConfig);
+            try {
+                turtle.render();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-                width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
-                height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
+            secondConfig.x = -turtle.minX + imageBorder;
+            secondConfig.y = -turtle.minY + imageBorder;
+            svgConfig = secondConfig.clone();
+            turtle.setInitialConfig(secondConfig);
 
-                System.out.println("Image size: " + width + "x" + height);
+            width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
+            height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
 
-                if (imageAnimation) {
-                    StepTurtle sTurtle;
+            System.out.println("Image size: " + width + "x" + height);
 
-                    sTurtle = new StepTurtle(turtleInputString, secondConfig.clone());
+            //turtle.reset();
+            turtle.setListener(listener);
 
-                    TurtleAnimator animator = new TurtleAnimator(sTurtle, width, height, backgroundColor);
-                    animator.initialize();
-                    turtle.reset();
-                }
+            BufferedImage img = null;
+            Graphics2D graphics = null;
 
-                BufferedImage img = createCompatibleImage(width, height);
+            if (imageAnimation) {
+                StepTurtle sTurtle;
 
-                Graphics2D graphics = img.createGraphics();
+                sTurtle = new StepTurtle(turtleInputString, secondConfig.clone());
+
+                TurtleAnimator animator = new TurtleAnimator(sTurtle, width, height, backgroundColor);
+                animator.initialize();
+            }
+
+            if (outputImageContent || imagePreview) {
+                img = createCompatibleImage(width, height);
+
+                graphics = img.createGraphics();
                 graphics.setBackground(backgroundColor);
                 graphics.clearRect(0, 0, img.getWidth(), img.getHeight());
 
-                turtle.setGraphicsListener(new GraphicsListener() {
-                    @Override
-                    public void drawLine(double x1, double x2, double y1, double y2, double width, Color color) {
-                        graphics.setColor(color);
-                        graphics.setStroke(new BasicStroke((float) (width >= 0 ? width : 0)));
-                        graphics.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
-                    }
-
-                    @Override
-                    public void fillPath(GeneralPath polygon, Color color) {
-                        graphics.setColor(color);
-                        graphics.setStroke(new BasicStroke((float) 0));
-                        //graphics.fillPolygon(polygon);
-                        graphics.fill(polygon);
-                    }
-
-                    @Override
-                    public void end() {
-
-                    }
-                });
-
-                try {
-                    turtle.render();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                graphics.dispose();
-
-                if (imagePreview) {
-                    ImagePreviewer imgp = new ImagePreviewer(img);
-                    imgp.initialize();
-                }
-
-                if (outputImageContent) {
-                    System.out.println("Saving image in background..");
-
-                    new Thread(() -> {
-                        File imageOutput = new File(imageOutputFile);
-                        try {
-                            ImageIO.write(img, "png", imageOutput);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        System.out.println(imageOutput.getAbsolutePath());
-                    }).start();
-                }
+                listener.addListener(new GraphicsRenderer(graphics));
             }
 
             if (outputSVGContent) {
@@ -412,15 +372,40 @@ public class ApplicationLoader {
 
                 try {
                     GraphicsListener gl = new SVGCompiler(svgOutputFile, width, height);
-
-                    turtle.setGraphicsListener(gl);
-
-                    turtle.render();
-
-                } catch (Exception e) {
+                    listener.addListener(gl);
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
 
+            try {
+                turtle.render();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (graphics != null) {
+                graphics.dispose();
+            }
+
+            if (imagePreview && img != null) {
+                ImagePreviewer imgp = new ImagePreviewer(img);
+                imgp.initialize();
+            }
+
+            if (outputImageContent && img != null) {
+                System.out.println("Saving image in background..");
+
+                BufferedImage finalImg = img;
+                new Thread(() -> {
+                    File imageOutput = new File(imageOutputFile);
+                    try {
+                        ImageIO.write(finalImg, "png", imageOutput);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(imageOutput.getAbsolutePath());
+                }).start();
             }
         }
     }

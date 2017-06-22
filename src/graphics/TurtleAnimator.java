@@ -55,7 +55,7 @@ public class TurtleAnimator extends JFrame {
             Button resetButton = new Button("Reset");
             controls.add(resetButton);
 
-            JSlider slider = new JSlider(1, 300);
+            JSlider slider = new JSlider(1, 1000);
             slider.setOrientation(JSlider.HORIZONTAL);
 
             slider.addChangeListener(e -> animationTimer.setDelay(1000 / slider.getValue()));
@@ -83,7 +83,7 @@ public class TurtleAnimator extends JFrame {
             GraphicsPanel p = new GraphicsPanel(background, width, height);
             this.add(p, BorderLayout.CENTER);
 
-            this.turtle.setGraphicsListener(new GraphicsListener() {
+            this.turtle.setListener(new GraphicsListener() {
                 @Override
                 public void drawLine(double x1, double x2, double y1, double y2, double width, Color color) {
                     p.imageGraphics.setColor(color);
