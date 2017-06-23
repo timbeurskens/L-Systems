@@ -2,6 +2,7 @@ package lsystem;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * L-System
@@ -33,7 +34,9 @@ import java.util.HashSet;
 public class LSystem {
     private RuleSet productionRules;
     private String tape;
-    private HashSet<Character> ignoreList = new HashSet<>();
+    private Set<Character> ignoreList = new HashSet<>();
+    private Set<Character> blockStartList = new HashSet<>();
+    private Set<Character> blockEndList = new HashSet<>();
 
     public LSystem(String axiom, RuleSet productions) {
         this.tape = axiom;
@@ -43,6 +46,18 @@ public class LSystem {
     public void addToIgnoreList(char[] chars) {
         for (char c : chars) {
             ignoreList.add(c);
+        }
+    }
+
+    public void addToBlockStartList(char[] chars) {
+        for (char c : chars) {
+            blockStartList.add(c);
+        }
+    }
+
+    public void addToBlockEndList(char[] chars) {
+        for (char c : chars) {
+            blockEndList.add(c);
         }
     }
 
@@ -72,9 +87,9 @@ public class LSystem {
                         int layer = 0;
 
                         while (checkerIndex >= 0 && leftChar == '\0' && layer >= 0) {
-                            if (chars[checkerIndex] == '[') {
+                            if (blockStartList.contains(chars[checkerIndex])) {
                                 layer++;
-                            } else if (chars[checkerIndex] == ']') {
+                            } else if (blockEndList.contains(chars[checkerIndex])) {
                                 layer--;
                             }
                             if (!ignoreList.contains(chars[checkerIndex]) && layer == 0) {
@@ -91,9 +106,9 @@ public class LSystem {
                         layer = 0;
 
                         while (checkerIndex < chars.length && rightChar == '\0' && layer >= 0) {
-                            if (chars[checkerIndex] == '[') {
+                            if (blockStartList.contains(chars[checkerIndex])) {
                                 layer++;
-                            } else if (chars[checkerIndex] == ']') {
+                            } else if (blockEndList.contains(chars[checkerIndex])) {
                                 layer--;
                             }
                             if (!ignoreList.contains(chars[checkerIndex]) && layer == 0) {

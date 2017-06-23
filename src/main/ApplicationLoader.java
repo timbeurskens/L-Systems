@@ -146,6 +146,8 @@ public class ApplicationLoader {
             boolean outputSVGContent = false;
             boolean imageAnimation = false;
             char[] ignoreChars = new char[0];
+            char[] blockStartChars = new char[0];
+            char[] blockEndChars = new char[0];
 
             //read rules
             HashMap<String, String> systemRuleCollection = inputConfig.get("rules");
@@ -245,6 +247,8 @@ public class ApplicationLoader {
                 config.setPolygonColor(Color.decode(settingsCollection.getOrDefault("polygon_color", "#0000FF")));
                 config.colorIncrement = Float.parseFloat(settingsCollection.getOrDefault("color_increment", "10.0"));
 
+                blockStartChars = settingsCollection.getOrDefault("block_start", "").toCharArray();
+                blockEndChars = settingsCollection.getOrDefault("block_end", "").toCharArray();
                 ignoreChars = settingsCollection.getOrDefault("ignore", "").toCharArray();
                 backgroundColor = Color.decode(settingsCollection.getOrDefault("background_color", "#FFFFFF"));
                 outputImageContent = Boolean.parseBoolean(settingsCollection.getOrDefault("image_output", "True"));
@@ -261,6 +265,10 @@ public class ApplicationLoader {
 
             LSystem mainSystem = new LSystem(axiom, systemRules);
             mainSystem.addToIgnoreList(ignoreChars);
+            mainSystem.addToBlockStartList(blockEndChars);
+            mainSystem.addToBlockEndList(blockEndChars);
+
+
             long startTime = System.nanoTime();
             for (int i = 1; i <= numGenerations; i++) {
                 try {
