@@ -47,7 +47,7 @@ public class LSystem {
         for (char c : chars) {
             ignoreList.add(c);
         }
-        System.out.println(ignoreList);
+
     }
 
     public void addToBlockStartList(char[] chars) {

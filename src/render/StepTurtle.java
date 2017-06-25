@@ -15,16 +15,20 @@ public class StepTurtle extends Turtle{
     }
 
     public boolean step(){
-        if(currentTapePosition < chars.length){
-            doTurtleAction(chars[currentTapePosition]);
+        while (currentTapePosition < chars.length) {
+            boolean listenerInvoked = doTurtleAction(chars[currentTapePosition]);
             currentTapePosition++;
-            return true;
-        }else{
-            if (listener != null) {
-                listener.end();
+
+            if (listenerInvoked) {
+                break;
             }
+        }
+
+        if (currentTapePosition >= chars.length && listener != null) {
+            listener.end();
             return false;
         }
+        return true;
     }
 
     private void initializeTape(){

@@ -1,2 +1,2 @@
-java -jar ../out/artifacts/CarpetDesigner/CarpetDesigner.jar -s 3x3 -o CarpetDesignerOutputFile.txt turtle_output=false color=#000000 image_output=false image_animation=true length=5 image_preview=true svg_output=false generations=6 polygon_color=#000000
+java -jar ../out/artifacts/CarpetDesigner/CarpetDesigner.jar -f -e -s 3x3 -o CarpetDesignerOutputFile.txt turtle_output=false color=#000000 image_output=false image_animation=true length=5 image_preview=true svg_output=false generations=4 polygon_color=#000000
 java -Xmx8G -Xms6G -jar ../out/artifacts/L_System_jar/L-System.jar CarpetDesignerOutputFile.txt

@@ -77,53 +77,38 @@ public class Turtle {
         }
     }
 
-    protected void doTurtleAction(char tapeSymbol) {
+    boolean doTurtleAction(char tapeSymbol) {
         switch (tapeSymbol) {
             case 'g':
-                forward(true);
-                break;
+                return forward(true);
             case 'f':
-                forward(false);
-                break;
+                return forward(false);
             case '[':
-                pushStack();
-                break;
+                return pushStack();
             case ']':
-                popStack();
-                break;
+                return popStack();
             case '-':
-                turn(-currentConfig.angleIncrement);
-                break;
+                return turn(-currentConfig.angleIncrement);
             case '+':
-                turn(currentConfig.angleIncrement);
-                break;
+                return turn(currentConfig.angleIncrement);
             case '!':
-                widthChange(currentConfig.widthIncrement);
-                break;
+                return widthChange(currentConfig.widthIncrement);
             case '~':
-                widthChange(-currentConfig.widthIncrement);
-                break;
+                return widthChange(-currentConfig.widthIncrement);
             case '#':
-                lineColorChange(currentConfig.colorIncrement);
-                break;
+                return lineColorChange(currentConfig.colorIncrement);
             case '@':
-                lineColorChange(-currentConfig.colorIncrement);
-                break;
+                return lineColorChange(-currentConfig.colorIncrement);
             case '*':
-                polygonColorChange(currentConfig.colorIncrement);
-                break;
+                return polygonColorChange(currentConfig.colorIncrement);
             case '&':
-                polygonColorChange(-currentConfig.colorIncrement);
-                break;
+                return polygonColorChange(-currentConfig.colorIncrement);
             case '%':
-                turn(180);
-                break;
+                return turn(180);
             case '{':
-                startPath();
-                break;
+                return startPath();
             case '}':
-                endPath();
-                break;
+                return endPath();
             default:
                     /* TODO: Error checking? */
                 try {
@@ -132,24 +117,26 @@ public class Turtle {
                     e.printStackTrace();
                 }
         }
+        return false;
     }
 
-    private void pushStack() {
-
+    private boolean pushStack() {
         configStack.push(currentConfig.clone());
-
+        return false;
     }
 
-    private void popStack() {
+    private boolean popStack() {
         if (configStack.empty()) {
-            return;
+            return false;
         }
         currentConfig = configStack.pop();
+        return false;
     }
 
 
-    private void startPath() {
+    private boolean startPath() {
         currentConfig.path = newPath();
+        return false;
     }
 
     private GeneralPath newPath() {
@@ -158,14 +145,16 @@ public class Turtle {
         return np;
     }
 
-    private void endPath() {
+    private boolean endPath() {
         currentConfig.path.lineTo(currentConfig.x, currentConfig.y);
         if (listener != null) {
             listener.fillPath(currentConfig.path, currentConfig.getPolygonColor());
+            return true;
         }
+        return false;
     }
 
-    private void forward(boolean penDown) {
+    private boolean forward(boolean penDown) {
         double radians = Math.toRadians(currentConfig.angle);
         double dx = Math.sin(radians) * currentConfig.length;
         double dy = -Math.cos(radians) * currentConfig.length;
@@ -181,7 +170,9 @@ public class Turtle {
             }
         } else if (penDown && listener != null) {
             listener.drawLine(currentConfig.x - dx, currentConfig.x, currentConfig.y - dy, currentConfig.y, currentConfig.width, currentConfig.getLineColor());
+            return true;
         }
+        return false;
     }
 
     private void checkBoundingBox() {
@@ -197,22 +188,26 @@ public class Turtle {
         }
     }
 
-    private void turn(double angle) {
+    private boolean turn(double angle) {
         currentConfig.angle += angle;
 
         currentConfig.angle = currentConfig.angle % (360.0);
+        return false;
     }
 
-    private void lineColorChange(float hueChange) {
+    private boolean lineColorChange(float hueChange) {
         currentConfig.addLineHue(hueChange);
+        return false;
     }
 
-    private void polygonColorChange(float hueChange) {
+    private boolean polygonColorChange(float hueChange) {
         currentConfig.addPolygonHue(hueChange);
+        return false;
     }
 
-    private void widthChange(double addWidth) {
+    private boolean widthChange(double addWidth) {
         currentConfig.width += addWidth;
+        return false;
     }
 
     public void setListener(GraphicsListener listener) {

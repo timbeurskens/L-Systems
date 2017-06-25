@@ -1,11 +1,11 @@
 [rules]
-B=[hBB]+w-[hBB]+w-[hBh]-ww+hhh
+B=[BhB]+w-[hBh]+w-[BhB][+w]-ww+hhh
 w=www
 h=hhh
 [turtle]
 B={g+g+g+g+}f
-w=f
-h=f
+w=g
+h=g
 [settings]
 axiom=B
 angle=90
@@ -16,5 +16,5 @@ image_animation=true
 length=5
 image_preview=true
 svg_output=false
-generations=6
+generations=4
 polygon_color=#000000
