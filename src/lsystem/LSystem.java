@@ -47,15 +47,18 @@ public class LSystem {
         for (char c : chars) {
             ignoreList.add(c);
         }
+        System.out.println(ignoreList);
     }
 
     public void addToBlockStartList(char[] chars) {
+        addToIgnoreList(chars);
         for (char c : chars) {
             blockStartList.add(c);
         }
     }
 
     public void addToBlockEndList(char[] chars) {
+        addToIgnoreList(chars);
         for (char c : chars) {
             blockEndList.add(c);
         }
@@ -87,9 +90,9 @@ public class LSystem {
                         int layer = 0;
 
                         while (checkerIndex >= 0 && leftChar == '\0' && layer >= 0) {
-                            if (blockStartList.contains(chars[checkerIndex])) {
+                            if (blockEndList.contains(chars[checkerIndex])) {
                                 layer++;
-                            } else if (blockEndList.contains(chars[checkerIndex])) {
+                            } else if (blockStartList.contains(chars[checkerIndex])) {
                                 layer--;
                             }
                             if (!ignoreList.contains(chars[checkerIndex]) && layer == 0) {
@@ -98,7 +101,7 @@ public class LSystem {
                             checkerIndex--;
                         }
 
-                        if (checkerIndex < 0 && leftChar == '\0' && layer >= 0) {
+                        if (leftChar == '\0' && (checkerIndex < 0 || layer != 0)) {
                             leftChar = '<';
                         }
 
@@ -117,7 +120,7 @@ public class LSystem {
                             checkerIndex++;
                         }
 
-                        if (checkerIndex >= chars.length && rightChar == '\0' && layer >= 0) {
+                        if (rightChar == '\0' && (checkerIndex >= chars.length || layer != 0)) {
                             rightChar = '>';
                         }
 

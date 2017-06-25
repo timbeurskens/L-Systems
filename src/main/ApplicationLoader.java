@@ -29,6 +29,8 @@ public class ApplicationLoader {
     static final Pattern stochasticPattern = Pattern.compile("(\\S)[0-9]?\\[([^]]*)]");
     static final Pattern contextSensitivePattern = Pattern.compile("((\\S)?<)?(\\S)(>(\\S)?)?");
 
+    private static final BufferedWriter log = new BufferedWriter(new OutputStreamWriter(System.out));
+
     private static HashMap<String, HashMap<String, String>> readConfiguration(String filename) throws IOException {
         HashMap<String, HashMap<String, String>> configuration = new HashMap<>();
 
@@ -60,6 +62,31 @@ public class ApplicationLoader {
             fileReader.close();
         }
         return configuration;
+    }
+
+    private static void logLine(String ln) {
+        try {
+            log.write(ln);
+            log.write("\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void flush() {
+        try {
+            log.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void log(String ln) {
+        try {
+            log.write(ln);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static String outputTextContent(String filename, String content) {
@@ -108,7 +135,7 @@ public class ApplicationLoader {
             File inputFile = new File(inputFileName);
             HashMap<String, HashMap<String, String>> inputConfig = null;
             if (!inputFile.exists() || !inputFile.canRead()) {
-                System.out.println("Cannot read file!");
+                logLine("Cannot read file!");
                 return;
             }
 
@@ -119,7 +146,7 @@ public class ApplicationLoader {
             }
 
             if (inputConfig == null) {
-                System.out.println("Something went wrong reading the config file");
+                logLine("Something went wrong reading the config file");
                 return;
             }
 
@@ -259,13 +286,13 @@ public class ApplicationLoader {
                 imageAnimation = Boolean.parseBoolean(settingsCollection.getOrDefault("image_animation", "False"));
             }
 
-            System.out.println("Axiom: " + axiom);
+            logLine("Axiom: " + axiom);
 
             secondConfig = config.clone();
 
             LSystem mainSystem = new LSystem(axiom, systemRules);
             mainSystem.addToIgnoreList(ignoreChars);
-            mainSystem.addToBlockStartList(blockEndChars);
+            mainSystem.addToBlockStartList(blockStartChars);
             mainSystem.addToBlockEndList(blockEndChars);
 
 
@@ -277,19 +304,19 @@ public class ApplicationLoader {
                     e.printStackTrace();
                 }
                 final int sysLength = mainSystem.getTapeLength();
-                if (sysLength < 150) {
-                    System.out.println("Generation " + i + ": " + mainSystem.getTape());
+                if (sysLength < 250) {
+                    logLine("Generation " + i + ": " + mainSystem.getTape());
                 } else {
-                    System.out.println("Generation " + i + ": [large output:" + sysLength + "]");
+                    logLine("Generation " + i + ": [large output:" + sysLength + "]");
                 }
             }
             long timeDiff = (System.nanoTime() - startTime) / 1000000;
-            System.out.println("Duration: " + timeDiff + "ms");
+            logLine("Duration: " + timeDiff + "ms");
 
             String systemOutput = mainSystem.getTape();
 
             if (outputSystemContent) {
-                System.out.println(outputTextContent(systemOutputFile, systemOutput));
+                logLine(outputTextContent(systemOutputFile, systemOutput));
             }
 
             String turtleInputString = "";
@@ -305,7 +332,7 @@ public class ApplicationLoader {
             }
 
             if (outputTurtleContent) {
-                System.out.println(outputTextContent(turtleOutputFile, turtleInputString));
+                logLine(outputTextContent(turtleOutputFile, turtleInputString));
             }
 
             int width = -1;
@@ -330,7 +357,7 @@ public class ApplicationLoader {
             width = (int) Math.ceil(turtle.maxX - turtle.minX) + (2 * imageBorder);
             height = (int) Math.ceil(turtle.maxY - turtle.minY) + (2 * imageBorder);
 
-            System.out.println("Image size: " + width + "x" + height);
+            logLine("Image size: " + width + "x" + height);
 
             //turtle.reset();
             turtle.setListener(listener);
@@ -358,7 +385,7 @@ public class ApplicationLoader {
             }
 
             if (outputSVGContent) {
-                System.out.println("SVG size: " + width + "x" + height);
+                logLine("SVG size: " + width + "x" + height);
 
                 try {
                     GraphicsListener gl = new SVGCompiler(svgOutputFile, width, height);
@@ -369,7 +396,6 @@ public class ApplicationLoader {
             }
 
             try {
-                System.out.println(turtle.getCurrentConfig());
                 turtle.render();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -385,7 +411,7 @@ public class ApplicationLoader {
             }
 
             if (outputImageContent) {
-                System.out.println("Saving image in background..");
+                logLine("Saving image in background..");
 
                 BufferedImage finalImg = img;
                 new Thread(() -> {
@@ -395,9 +421,12 @@ public class ApplicationLoader {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    System.out.println(imageOutput.getAbsolutePath());
+                    logLine(imageOutput.getAbsolutePath());
+                    flush();
                 }).start();
             }
         }
+
+        flush();
     }
 }
