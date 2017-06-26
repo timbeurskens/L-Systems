@@ -64,7 +64,7 @@ public class ApplicationLoader {
         return configuration;
     }
 
-    private static void logLine(String ln) {
+    public static void logLine(String ln) {
         try {
             log.write(ln);
             log.write("\n");
@@ -175,6 +175,8 @@ public class ApplicationLoader {
             char[] ignoreChars = new char[0];
             char[] blockStartChars = new char[0];
             char[] blockEndChars = new char[0];
+            boolean skipLeft = false;
+            boolean skipRight = false;
 
             //read rules
             HashMap<String, String> systemRuleCollection = inputConfig.get("rules");
@@ -274,6 +276,8 @@ public class ApplicationLoader {
                 config.setPolygonColor(Color.decode(settingsCollection.getOrDefault("polygon_color", "#0000FF")));
                 config.colorIncrement = Float.parseFloat(settingsCollection.getOrDefault("color_increment", "10.0"));
 
+                skipLeft = Boolean.parseBoolean(settingsCollection.getOrDefault("skip_left", "False"));
+                skipRight = Boolean.parseBoolean(settingsCollection.getOrDefault("skip_right", "False"));
                 blockStartChars = settingsCollection.getOrDefault("block_start", "").toCharArray();
                 blockEndChars = settingsCollection.getOrDefault("block_end", "").toCharArray();
                 ignoreChars = settingsCollection.getOrDefault("ignore", "").toCharArray();
@@ -294,6 +298,8 @@ public class ApplicationLoader {
             mainSystem.addToIgnoreList(ignoreChars);
             mainSystem.addToBlockStartList(blockStartChars);
             mainSystem.addToBlockEndList(blockEndChars);
+            mainSystem.allowSkipLeft = skipLeft;
+            mainSystem.allowSkipRight = skipRight;
 
 
             long startTime = System.nanoTime();

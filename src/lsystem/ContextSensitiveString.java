@@ -30,6 +30,7 @@ public class ContextSensitiveString {
         for (ContextProductionCollection element : elements) {
             if (checker.check(element)) {
                 //System.out.println("Match");
+                //ApplicationLoader.logLine("!");
                 int score = element.getScore();
                 if (score > numMatches) {
                     numMatches = score;
@@ -39,6 +40,7 @@ public class ContextSensitiveString {
                 //System.out.println("No match");
             }
         }
+        //ApplicationLoader.logLine("---");
         return currentProduction;
     }
 
