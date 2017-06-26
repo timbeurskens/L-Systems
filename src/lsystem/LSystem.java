@@ -32,13 +32,13 @@ import java.util.Set;
  * System.out.println(sb.toString());
  */
 public class LSystem {
+    public boolean allowSkipLeft = false;
+    public boolean allowSkipRight = false;
     private RuleSet productionRules;
     private String tape;
     private Set<Character> ignoreList = new HashSet<>();
     private Set<Character> blockStartList = new HashSet<>();
     private Set<Character> blockEndList = new HashSet<>();
-    private boolean allowSkipLeft = true;
-    private boolean allowSkipRight = false;
 
     public LSystem(String axiom, RuleSet productions) {
         this.tape = axiom;
@@ -87,50 +87,63 @@ public class LSystem {
                         //CONTEXT MATCHER:
                         char leftChar = '\0';
                         char rightChar = '\0';
+                        char currentChar;
 
                         int checkerIndex = currentIndex - 1;
                         int layer = 0;
+                        int targetLayer = 0;
 
-                        boolean skipLeft = false;
-                        while (checkerIndex >= 0 && leftChar == '\0' && layer >= 0 - (skipLeft ? 1 : 0)) {
-                            if (blockEndList.contains(chars[checkerIndex])) {
+                        while (checkerIndex >= 0 && leftChar == '\0' && layer >= targetLayer) {
+                            currentChar = chars[checkerIndex];
+                            if (blockEndList.contains(currentChar)) {
                                 layer++;
-                            } else if (blockStartList.contains(chars[checkerIndex])) {
+                            } else if (blockStartList.contains(currentChar)) {
                                 layer--;
-                                skipLeft = layer < 0 && allowSkipLeft;
+                                targetLayer = (layer < targetLayer && allowSkipLeft) ? layer : targetLayer;
                             }
-                            if (!ignoreList.contains(chars[checkerIndex]) && layer == 0 - (skipLeft ? 1 : 0)) {
-                                leftChar = chars[checkerIndex];
+                            if (!ignoreList.contains(currentChar) && layer == targetLayer) {
+                                leftChar = currentChar;
                             }
                             checkerIndex--;
                         }
 
-                        if (leftChar == '\0' && (checkerIndex < 0 || layer != 0)) {
+                        //assert !(allowSkipLeft && leftChar == '\0') || checkerIndex < 0;
+
+                        if (leftChar == '\0' && (checkerIndex < 0 || layer != targetLayer)) {
                             leftChar = '<';
                         }
 
+                        //assert leftChar != '\0';
+
                         checkerIndex = currentIndex + 1;
                         layer = 0;
+                        targetLayer = 0;
 
-                        boolean skipRight = false;
-                        while (checkerIndex < chars.length && rightChar == '\0' && layer >= 0 - (skipRight ? 1 : 0)) {
-                            if (blockStartList.contains(chars[checkerIndex])) {
+                        while (checkerIndex < chars.length && rightChar == '\0' && layer >= targetLayer) {
+                            currentChar = chars[checkerIndex];
+                            if (blockStartList.contains(currentChar)) {
                                 layer++;
-                            } else if (blockEndList.contains(chars[checkerIndex])) {
+                            } else if (blockEndList.contains(currentChar)) {
                                 layer--;
-                                skipRight = layer < 0 && allowSkipRight;
+                                targetLayer = (layer < targetLayer && allowSkipRight) ? layer : targetLayer;
                             }
-                            if (!ignoreList.contains(chars[checkerIndex]) && layer == 0 - (skipRight ? 1 : 0)) {
-                                rightChar = chars[checkerIndex];
+                            if (!ignoreList.contains(currentChar) && layer == targetLayer) {
+                                rightChar = currentChar;
                             }
                             checkerIndex++;
                         }
 
-                        if (rightChar == '\0' && (checkerIndex >= chars.length || layer != 0)) {
+                        //assert !(allowSkipRight && rightChar == '\0') || checkerIndex >= chars.length;
+
+                        //assert allowSkipRight || targetLayer == 0;
+
+                        if (rightChar == '\0' && (checkerIndex >= chars.length || layer != targetLayer)) {
                             rightChar = '>';
                         }
 
-                        //System.out.println(leftChar + "<" + chars[currentIndex] + ">" + rightChar + " - " + collection.getBefore() + "<" + chars[currentIndex] + ">" + collection.getAfter());
+                        //assert rightChar != '\0';
+
+                        //ApplicationLoader.logLine(leftChar + "<" + chars[currentIndex] + ">" + rightChar + " - " + collection.getBefore() + "<" + chars[currentIndex] + ">" + collection.getAfter());
 
                         if (!collection.isEmptyBefore()) {
                             if (!collection.isAnyBefore() && collection.getBefore() != leftChar) {
