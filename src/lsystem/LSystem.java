@@ -37,6 +37,8 @@ public class LSystem {
     private Set<Character> ignoreList = new HashSet<>();
     private Set<Character> blockStartList = new HashSet<>();
     private Set<Character> blockEndList = new HashSet<>();
+    private boolean allowSkipLeft = true;
+    private boolean allowSkipRight = false;
 
     public LSystem(String axiom, RuleSet productions) {
         this.tape = axiom;
@@ -89,13 +91,15 @@ public class LSystem {
                         int checkerIndex = currentIndex - 1;
                         int layer = 0;
 
-                        while (checkerIndex >= 0 && leftChar == '\0' && layer >= 0) {
+                        boolean skipLeft = false;
+                        while (checkerIndex >= 0 && leftChar == '\0' && layer >= 0 - (skipLeft ? 1 : 0)) {
                             if (blockEndList.contains(chars[checkerIndex])) {
                                 layer++;
                             } else if (blockStartList.contains(chars[checkerIndex])) {
                                 layer--;
+                                skipLeft = layer < 0 && allowSkipLeft;
                             }
-                            if (!ignoreList.contains(chars[checkerIndex]) && layer == 0) {
+                            if (!ignoreList.contains(chars[checkerIndex]) && layer == 0 - (skipLeft ? 1 : 0)) {
                                 leftChar = chars[checkerIndex];
                             }
                             checkerIndex--;
@@ -108,13 +112,15 @@ public class LSystem {
                         checkerIndex = currentIndex + 1;
                         layer = 0;
 
-                        while (checkerIndex < chars.length && rightChar == '\0' && layer >= 0) {
+                        boolean skipRight = false;
+                        while (checkerIndex < chars.length && rightChar == '\0' && layer >= 0 - (skipRight ? 1 : 0)) {
                             if (blockStartList.contains(chars[checkerIndex])) {
                                 layer++;
                             } else if (blockEndList.contains(chars[checkerIndex])) {
                                 layer--;
+                                skipRight = layer < 0 && allowSkipRight;
                             }
-                            if (!ignoreList.contains(chars[checkerIndex]) && layer == 0) {
+                            if (!ignoreList.contains(chars[checkerIndex]) && layer == 0 - (skipRight ? 1 : 0)) {
                                 rightChar = chars[checkerIndex];
                             }
                             checkerIndex++;
