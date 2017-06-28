@@ -14,6 +14,8 @@ public class TurtleConfig implements Cloneable {
     public double angle;
     public double x;
     public double y;
+    public double lnStartX = 0;
+    public double lnStartY = 0;
     public double angleIncrement;
     public double widthIncrement;
     public float colorIncrement;

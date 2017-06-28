@@ -4,8 +4,6 @@ import lsystem.ContextSensitiveString;
 import lsystem.RuleSet;
 import lsystem.StochasticString;
 
-import java.util.HashSet;
-
 /**
  * L-System
  * Created by s154796 on 3-7-2016.
@@ -76,6 +74,14 @@ public class TurtleSet extends RuleSet {
         put(c, ")");
     }
 
+    public void addLineStart(char c) {
+        put(c, "/");
+    }
+
+    public void addLineEnd(char c) {
+        put(c, "\\");
+    }
+
     public void addLeft(char c){
         put(c, "-");
     }
@@ -130,6 +136,8 @@ public class TurtleSet extends RuleSet {
         addFlip('%');
         addCurveStart('(');
         addCurveEnd(')');
+        addLineStart('/');
+        addLineEnd('\\');
     }
 
     public void addEmpty(char c){

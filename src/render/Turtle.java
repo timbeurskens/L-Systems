@@ -109,6 +109,10 @@ public class Turtle {
                 return startPath();
             case '}':
                 return endPath();
+            case '/':
+                return startLine();
+            case '\\':
+                return endLine();
             default:
                     /* TODO: Error checking? */
                 try {
@@ -154,22 +158,40 @@ public class Turtle {
         return false;
     }
 
+    private boolean startLine() {
+        currentConfig.lnStartX = currentConfig.x;
+        currentConfig.lnStartY = currentConfig.y;
+        return false;
+    }
+
+    private boolean endLine() {
+        if (listener != null) {
+            listener.drawLine(currentConfig.lnStartX, currentConfig.x, currentConfig.lnStartY, currentConfig.y, currentConfig.width, currentConfig.getLineColor());
+            return true;
+        }
+        return false;
+    }
+
     private boolean forward(boolean penDown) {
         double radians = Math.toRadians(currentConfig.angle);
         double dx = Math.sin(radians) * currentConfig.length;
         double dy = -Math.cos(radians) * currentConfig.length;
+
+        double px = currentConfig.x;
+        double py = currentConfig.y;
+
         currentConfig.x += dx;
         currentConfig.y += dy;
         checkBoundingBox();
 
         if (currentConfig.path != null) {
             if (penDown) {
-                currentConfig.path.lineTo(currentConfig.x - dx, currentConfig.y - dy);
+                currentConfig.path.lineTo(px, py);
             } else {
-                currentConfig.path.moveTo(currentConfig.x - dx, currentConfig.y - dy);
+                currentConfig.path.moveTo(px, py);
             }
         } else if (penDown && listener != null) {
-            listener.drawLine(currentConfig.x - dx, currentConfig.x, currentConfig.y - dy, currentConfig.y, currentConfig.width, currentConfig.getLineColor());
+            listener.drawLine(px, currentConfig.x, py, currentConfig.y, currentConfig.width, currentConfig.getLineColor());
             return true;
         }
         return false;

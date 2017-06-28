@@ -11,14 +11,14 @@ public class StochasticString {
     private HashSet<StringPermutationCollection> elements = new HashSet<>();
 
     public void addProduction(String str, double p){
-        StringPermutationCollection spc = new StringPermutationCollection(str, (int) (p * 1000));
+        StringPermutationCollection spc = new StringPermutationCollection(str, p);
         elements.add(spc);
     }
 
     public String getRandomProduction(){
-        int pc = (int) (Math.random() * 1000);
+        double pc = Math.random();
         for(StringPermutationCollection spc : elements){
-            pc -= spc.getChance();
+            pc -= spc.getProbability();
             if(pc <= 0){
                 return spc.getProduction();
             }
@@ -34,7 +34,7 @@ public class StochasticString {
     public String toString(){
         StringBuilder strb = new StringBuilder();
         elements.forEach(stringPermutationCollection -> {
-            strb.append(stringPermutationCollection.getProduction()).append(":").append(stringPermutationCollection.getChance() / 1000.0).append(", ");
+            strb.append(stringPermutationCollection.getProduction()).append(":").append(stringPermutationCollection.getProbability()).append(", ");
         });
         return strb.toString();
     }

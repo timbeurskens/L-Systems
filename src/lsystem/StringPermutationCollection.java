@@ -6,14 +6,15 @@ package lsystem;
  */
 public class StringPermutationCollection{
     private String production;
-    private int chance;
-    public StringPermutationCollection(String str, int p){
+    private double probability;
+
+    public StringPermutationCollection(String str, double p) {
         this.production = str;
-        this.chance = p;
+        this.probability = p;
     }
 
-    public int getChance(){
-        return chance;
+    public double getProbability() {
+        return probability;
     }
 
     public String getProduction(){
